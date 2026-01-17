@@ -1,0 +1,78 @@
+<div style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h1>题库管理系统</h1>
+  
+  <div *ngIf="user" style="margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+    <p>欢迎, {{ user.fullName || user.username }}! 
+      <span style="margin-left: 10px; color: #666;">
+        角色: {{ getRoleLabel(user.role) }}
+      </span>
+    </p>
+  </div>
+
+  <div style="margin-bottom: 30px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <a routerLink="/questions/search" style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+      搜索题目
+    </a>
+    <a routerLink="/questions/create" style="padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+      创建题目
+    </a>
+    <a routerLink="/question-sets" style="padding: 10px 20px; background: #17a2b8; color: white; text-decoration: none; border-radius: 5px;">
+      试卷列表
+    </a>
+    <a routerLink="/question-sets/create" style="padding: 10px 20px; background: #ffc107; color: black; text-decoration: none; border-radius: 5px;">
+      组卷
+    </a>
+    <a routerLink="/collections" style="padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+      收藏夹
+    </a>
+    <a routerLink="/my-answers" style="padding: 10px 20px; background: #9b59b6; color: white; text-decoration: none; border-radius: 5px;">
+      我的答题
+    </a>
+  </div>
+
+  <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+    <input
+      type="text"
+      placeholder="搜索题目..."
+      [(ngModel)]="searchKeyword"
+      (keypress)="onKeyPress($event)"
+      style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;"
+    />
+    <button (click)="handleSearch()" style="padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px;">
+      搜索
+    </button>
+  </div>
+
+  <div *ngIf="loading">
+    <p>加载中...</p>
+  </div>
+
+  <div *ngIf="!loading">
+    <h2>题目列表 ({{ questions.length }})</h2>
+    <p *ngIf="questions.length === 0">暂无题目</p>
+    <div *ngIf="questions.length > 0" style="display: grid; gap: 15px;">
+      <div *ngFor="let question of questions" style="padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+          <h3 style="margin: 0; flex: 1;">{{ question.title }}</h3>
+          <div style="display: flex; gap: 5px;">
+            <span style="padding: 2px 8px; background: #e3f2fd; color: #1976d2; border-radius: 3px; font-size: 12px;">
+              {{ getQuestionTypeLabel(question.type) }}
+            </span>
+            <span style="padding: 2px 8px; background: #f3e5f5; color: #7b1fa2; border-radius: 3px; font-size: 12px;">
+              {{ getDifficultyLabel(question.difficulty) }}
+            </span>
+          </div>
+        </div>
+        <p style="color: #666; margin-bottom: 10px;">{{ question.content.substring(0, 200) }}...</p>
+        <div *ngIf="question.tags" style="margin-bottom: 10px;">
+          <span *ngFor="let tag of getTags(question.tags)" style="margin-right: 5px; padding: 2px 8px; background: #e0e0e0; border-radius: 3px; font-size: 12px;">
+            {{ tag }}
+          </span>
+        </div>
+        <a [routerLink]="['/questions', question.id]" style="color: #007bff; text-decoration: none;">
+          查看详情 →
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

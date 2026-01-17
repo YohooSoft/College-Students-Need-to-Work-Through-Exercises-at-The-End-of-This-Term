@@ -14,11 +14,11 @@
 - **Maven** - 项目管理
 
 ### 前端技术栈
-- **React 18** - 前端框架
+- **Angular 21** - 前端框架
 - **TypeScript** - 类型安全的JavaScript
-- **Vite** - 构建工具
-- **React Router** - 路由管理
-- **Axios** - HTTP客户端
+- **Angular CLI** - 构建工具
+- **Angular Router** - 路由管理
+- **Angular HttpClient** - HTTP客户端
 
 ## 功能特性
 
