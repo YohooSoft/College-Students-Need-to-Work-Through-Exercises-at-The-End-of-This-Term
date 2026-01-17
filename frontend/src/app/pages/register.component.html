@@ -1,0 +1,52 @@
+<div style="max-width: 400px; margin: 50px auto; padding: 20px;">
+  <h2>注册</h2>
+  <div *ngIf="error" style="color: red; margin-bottom: 10px;">{{ error }}</div>
+  <div *ngIf="success" style="color: green; margin-bottom: 10px;">{{ success }}</div>
+  <form (ngSubmit)="handleSubmit()">
+    <div style="margin-bottom: 15px;">
+      <label>用户名:</label>
+      <input
+        type="text"
+        [(ngModel)]="username"
+        name="username"
+        required
+        style="width: 100%; padding: 8px; margin-top: 5px;"
+      />
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label>邮箱:</label>
+      <input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        required
+        style="width: 100%; padding: 8px; margin-top: 5px;"
+      />
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label>姓名:</label>
+      <input
+        type="text"
+        [(ngModel)]="fullName"
+        name="fullName"
+        style="width: 100%; padding: 8px; margin-top: 5px;"
+      />
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label>密码:</label>
+      <input
+        type="password"
+        [(ngModel)]="password"
+        name="password"
+        required
+        style="width: 100%; padding: 8px; margin-top: 5px;"
+      />
+    </div>
+    <button type="submit" style="padding: 10px 20px; cursor: pointer;">
+      注册
+    </button>
+    <div style="margin-top: 15px;">
+      已有账号？<a routerLink="/login">登录</a>
+    </div>
+  </form>
+</div>
