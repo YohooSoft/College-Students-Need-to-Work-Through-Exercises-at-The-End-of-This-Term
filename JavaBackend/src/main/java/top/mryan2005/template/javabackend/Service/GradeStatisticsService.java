@@ -124,7 +124,7 @@ public class GradeStatisticsService {
         
         int totalQuestions = answers.size();
         long correctAnswers = answers.stream()
-            .filter(UserAnswer::getIsCorrect)
+            .filter(answer -> answer.getIsCorrect() != null && answer.getIsCorrect())
             .count();
         
         double correctRate = totalQuestions > 0 ? (double) correctAnswers / totalQuestions * 100 : 0.0;
@@ -155,7 +155,7 @@ public class GradeStatisticsService {
         
         int totalAttempts = answers.size();
         long correctAnswers = answers.stream()
-            .filter(UserAnswer::getIsCorrect)
+            .filter(answer -> answer.getIsCorrect() != null && answer.getIsCorrect())
             .count();
         
         double correctRate = (double) correctAnswers / totalAttempts * 100;
