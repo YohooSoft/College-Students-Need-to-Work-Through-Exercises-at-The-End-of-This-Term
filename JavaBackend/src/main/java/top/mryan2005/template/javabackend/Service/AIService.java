@@ -7,6 +7,8 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 
+import java.util.Map;
+
 @Service
 public class AIService {
     
@@ -96,6 +98,64 @@ public class AIService {
             
         } catch (Exception e) {
             return new AIGradingResult(false, 0, "解析AI响应失败", response);
+        }
+    }
+    
+    /**
+     * 生成学习建议
+     */
+    public String generateStudySuggestion(Long userId, Map<String, Object> userStatistics) {
+        if (chatModel == null) {
+            return "AI服务未配置";
+        }
+        
+        try {
+            String prompt = String.format(
+                "作为一位资深教育专家，请根据以下学生的学习统计数据提供个性化的学习建议：\n\n" +
+                "总考试次数：%s\n" +
+                "总答题数：%s\n" +
+                "平均分数：%s\n" +
+                "通过率：%s%%\n" +
+                "正确率：%s%%\n\n" +
+                "请提供：\n" +
+                "1. 学习情况分析\n" +
+                "2. 优势和不足\n" +
+                "3. 具体改进建议\n" +
+                "4. 推荐的学习重点",
+                userStatistics.get("totalExams"),
+                userStatistics.get("totalQuestions"),
+                userStatistics.get("averageScore"),
+                userStatistics.get("passRate"),
+                userStatistics.get("correctRate")
+            );
+            
+            return chatModel.call(prompt);
+        } catch (Exception e) {
+            return "AI建议生成失败：" + e.getMessage();
+        }
+    }
+    
+    /**
+     * 生成题目推荐理由
+     */
+    public String generateRecommendationReason(String questionTitle, String questionType, String difficulty) {
+        if (chatModel == null) {
+            return "基于您的学习情况推荐";
+        }
+        
+        try {
+            String prompt = String.format(
+                "为什么推荐学生做这道题？\n\n" +
+                "题目：%s\n" +
+                "类型：%s\n" +
+                "难度：%s\n\n" +
+                "请用一句话简要说明推荐理由（不超过50字）。",
+                questionTitle, questionType, difficulty
+            );
+            
+            return chatModel.call(prompt);
+        } catch (Exception e) {
+            return "基于您的学习情况推荐";
         }
     }
     

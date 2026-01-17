@@ -49,6 +49,41 @@ public class AIController {
         }
     }
     
+    @PostMapping("/study-suggestion")
+    public ApiResponse<String> generateStudySuggestion(@RequestBody StudySuggestionRequest request) {
+        try {
+            if (aiService == null) {
+                return ApiResponse.error("AI服务未配置");
+            }
+            
+            String suggestion = aiService.generateStudySuggestion(
+                request.getUserId(),
+                request.getUserStatistics()
+            );
+            return ApiResponse.success(suggestion);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+    
+    @PostMapping("/recommendation-reason")
+    public ApiResponse<String> generateRecommendationReason(@RequestBody RecommendationReasonRequest request) {
+        try {
+            if (aiService == null) {
+                return ApiResponse.error("AI服务未配置");
+            }
+            
+            String reason = aiService.generateRecommendationReason(
+                request.getQuestionTitle(),
+                request.getQuestionType(),
+                request.getDifficulty()
+            );
+            return ApiResponse.success(reason);
+        } catch (Exception e) {
+            return ApiResponse.error(e.getMessage());
+        }
+    }
+    
     // Request DTOs
     public static class ExplanationRequest {
         private String questionTitle;
@@ -74,5 +109,28 @@ public class AIController {
         public void setExpectedAnswer(String expectedAnswer) { this.expectedAnswer = expectedAnswer; }
         public String getStudentAnswer() { return studentAnswer; }
         public void setStudentAnswer(String studentAnswer) { this.studentAnswer = studentAnswer; }
+    }
+    
+    public static class StudySuggestionRequest {
+        private Long userId;
+        private java.util.Map<String, Object> userStatistics;
+        
+        public Long getUserId() { return userId; }
+        public void setUserId(Long userId) { this.userId = userId; }
+        public java.util.Map<String, Object> getUserStatistics() { return userStatistics; }
+        public void setUserStatistics(java.util.Map<String, Object> userStatistics) { this.userStatistics = userStatistics; }
+    }
+    
+    public static class RecommendationReasonRequest {
+        private String questionTitle;
+        private String questionType;
+        private String difficulty;
+        
+        public String getQuestionTitle() { return questionTitle; }
+        public void setQuestionTitle(String questionTitle) { this.questionTitle = questionTitle; }
+        public String getQuestionType() { return questionType; }
+        public void setQuestionType(String questionType) { this.questionType = questionType; }
+        public String getDifficulty() { return difficulty; }
+        public void setDifficulty(String difficulty) { this.difficulty = difficulty; }
     }
 }
