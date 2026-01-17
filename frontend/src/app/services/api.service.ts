@@ -190,4 +190,82 @@ export class ApiService {
   gradeEssay(data: { questionContent: string; expectedAnswer: string; studentAnswer: string }): Observable<ApiResponse<any>> {
     return this.http.post<ApiResponse<any>>(`${this.baseUrl}/ai/grade-essay`, data);
   }
+
+  generateStudySuggestion(data: { userId: number; userStatistics: any }): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.baseUrl}/ai/study-suggestion`, data);
+  }
+
+  // Exam Paper API
+  createExamPaper(data: any, userId: number): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/exam-papers?userId=${userId}`, data);
+  }
+
+  updateExamPaper(id: number, data: any): Observable<ApiResponse<any>> {
+    return this.http.put<ApiResponse<any>>(`${this.baseUrl}/exam-papers/${id}`, data);
+  }
+
+  publishExamPaper(id: number): Observable<ApiResponse<any>> {
+    return this.http.post<ApiResponse<any>>(`${this.baseUrl}/exam-papers/${id}/publish`, {});
+  }
+
+  getExamPaperById(id: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/exam-papers/${id}`);
+  }
+
+  getAllExamPapers(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/exam-papers`);
+  }
+
+  getPublicExamPapers(): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/exam-papers/public`);
+  }
+
+  getExamPapersByCreator(creatorId: number): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/exam-papers/creator/${creatorId}`);
+  }
+
+  getExamPapersByStatus(status: string): Observable<ApiResponse<any[]>> {
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/exam-papers/status/${status}`);
+  }
+
+  searchExamPapers(keyword?: string, isPublic?: boolean): Observable<ApiResponse<any[]>> {
+    let httpParams = new HttpParams();
+    if (keyword) httpParams = httpParams.set('keyword', keyword);
+    if (isPublic !== undefined) httpParams = httpParams.set('isPublic', isPublic.toString());
+    return this.http.get<ApiResponse<any[]>>(`${this.baseUrl}/exam-papers/search`, { params: httpParams });
+  }
+
+  deleteExamPaper(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.baseUrl}/exam-papers/${id}`);
+  }
+
+  // Statistics API
+  getExamPaperStatistics(examPaperId: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/statistics/exam-paper/${examPaperId}`);
+  }
+
+  getUserStatistics(userId: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/statistics/user/${userId}`);
+  }
+
+  getQuestionStatistics(questionId: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/statistics/question/${questionId}`);
+  }
+
+  // Recommendation API
+  getRecommendationsForUser(userId: number, limit: number = 10): Observable<ApiResponse<Question[]>> {
+    return this.http.get<ApiResponse<Question[]>>(`${this.baseUrl}/recommendations/user/${userId}?limit=${limit}`);
+  }
+
+  getSimilarQuestions(questionId: number, limit: number = 5): Observable<ApiResponse<Question[]>> {
+    return this.http.get<ApiResponse<Question[]>>(`${this.baseUrl}/recommendations/similar/${questionId}?limit=${limit}`);
+  }
+
+  getRecommendationsByDifficulty(difficulty: string, limit: number = 10): Observable<ApiResponse<Question[]>> {
+    return this.http.get<ApiResponse<Question[]>>(`${this.baseUrl}/recommendations/difficulty/${difficulty}?limit=${limit}`);
+  }
+
+  getSmartRecommendations(userId: number, limit: number = 10): Observable<ApiResponse<Question[]>> {
+    return this.http.get<ApiResponse<Question[]>>(`${this.baseUrl}/recommendations/smart/${userId}?limit=${limit}`);
+  }
 }
