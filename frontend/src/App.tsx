@@ -5,6 +5,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import QuestionDetail from './pages/QuestionDetail';
 import CreateQuestion from './pages/CreateQuestion';
+import QuestionSets from './pages/QuestionSets';
+import Collections from './pages/Collections';
+import MyAnswers from './pages/MyAnswers';
 import './App.css';
 
 function Navigation() {
@@ -63,6 +66,9 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/questions/:id" element={<QuestionDetail />} />
             <Route path="/questions/create" element={<CreateQuestion />} />
+            <Route path="/question-sets" element={<QuestionSets />} />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/my-answers" element={<MyAnswers />} />
           </Routes>
         </div>
       </AuthProvider>
