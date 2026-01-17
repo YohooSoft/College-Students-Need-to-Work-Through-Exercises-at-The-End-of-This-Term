@@ -41,6 +41,9 @@ public class UserAnswer {
     @Column(name = "time_spent")
     private Integer timeSpent; // 花费时间（秒）
     
+    @Column(name = "ai_feedback", columnDefinition = "TEXT")
+    private String aiFeedback; // AI评语（用于概述题）
+    
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt = LocalDateTime.now();
 }

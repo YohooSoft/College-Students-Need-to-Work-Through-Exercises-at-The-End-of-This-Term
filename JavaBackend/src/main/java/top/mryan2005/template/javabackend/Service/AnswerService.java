@@ -27,6 +27,9 @@ public class AnswerService {
     @Autowired
     private UserService userService;
     
+    @Autowired(required = false)
+    private AIService aiService;
+    
     @Transactional
     public UserAnswer submitAnswer(AnswerSubmitRequest request, Long userId) {
         User user = userService.getUserById(userId);
@@ -37,8 +40,26 @@ public class AnswerService {
             questionSet = questionSetService.getQuestionSetById(request.getQuestionSetId());
         }
         
-        // 判题逻辑
-        boolean isCorrect = checkAnswer(question, request.getAnswer());
+        // 判题逻辑 - 概述题使用AI判题
+        boolean isCorrect;
+        int score;
+        String aiFeedback = null;
+        
+        if (question.getType() == Question.QuestionType.ESSAY && aiService != null) {
+            // 使用AI判题
+            AIService.AIGradingResult aiResult = aiService.gradeEssay(
+                question.getContent(), 
+                question.getAnswer(), 
+                request.getAnswer()
+            );
+            isCorrect = aiResult.isCorrect();
+            score = aiResult.getScore();
+            aiFeedback = aiResult.getFeedback();
+        } else {
+            // 传统判题
+            isCorrect = checkAnswer(question, request.getAnswer());
+            score = isCorrect ? calculateScore(question) : 0;
+        }
         
         UserAnswer userAnswer = new UserAnswer();
         userAnswer.setUser(user);
@@ -48,13 +69,8 @@ public class AnswerService {
         userAnswer.setIsCorrect(isCorrect);
         userAnswer.setTimeSpent(request.getTimeSpent());
         userAnswer.setSubmittedAt(LocalDateTime.now());
-        
-        // 计算分数
-        if (isCorrect) {
-            userAnswer.setScore(calculateScore(question));
-        } else {
-            userAnswer.setScore(0);
-        }
+        userAnswer.setScore(score);
+        userAnswer.setAiFeedback(aiFeedback);
         
         return userAnswerRepository.save(userAnswer);
     }
@@ -78,6 +94,9 @@ public class AnswerService {
             case SHORT_ANSWER:
                 // 简单的字符串包含判断，实际应用中可以使用更复杂的算法
                 return correctAnswer.contains(submittedAnswer) || submittedAnswer.contains(correctAnswer);
+            case ESSAY:
+                // 概述题由AI判题，这里返回false作为默认
+                return false;
             default:
                 return false;
         }

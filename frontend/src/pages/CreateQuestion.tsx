@@ -78,6 +78,7 @@ const CreateQuestion: React.FC = () => {
             <option value="TRUE_FALSE">判断题</option>
             <option value="FILL_BLANK">填空题</option>
             <option value="SHORT_ANSWER">简答题</option>
+            <option value="ESSAY">概述题 (支持Markdown、Mermaid、LaTeX)</option>
           </select>
         </div>
 

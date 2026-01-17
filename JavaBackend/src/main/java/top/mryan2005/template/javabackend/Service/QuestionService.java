@@ -6,12 +6,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import top.mryan2005.template.javabackend.Pojo.Question;
+import top.mryan2005.template.javabackend.Pojo.KnowledgePoint;
 import top.mryan2005.template.javabackend.Pojo.User;
 import top.mryan2005.template.javabackend.Pojo.Dto.QuestionRequest;
 import top.mryan2005.template.javabackend.Repository.QuestionRepository;
 import top.mryan2005.template.javabackend.Exception.ResourceNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -21,6 +23,12 @@ public class QuestionService {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private KnowledgePointService knowledgePointService;
+    
+    @Autowired(required = false)
+    private AIService aiService;
     
     @Transactional
     public Question createQuestion(QuestionRequest request, Long userId) {
@@ -38,6 +46,24 @@ public class QuestionService {
         question.setCreator(creator);
         question.setCreatedAt(LocalDateTime.now());
         question.setUpdatedAt(LocalDateTime.now());
+        
+        // 关联知识点
+        if (request.getKnowledgePointIds() != null && !request.getKnowledgePointIds().isEmpty()) {
+            List<KnowledgePoint> knowledgePoints = request.getKnowledgePointIds().stream()
+                .map(knowledgePointService::getKnowledgePointById)
+                .collect(Collectors.toList());
+            question.setKnowledgePoints(knowledgePoints);
+        }
+        
+        // 如果没有提供解析且AI服务可用，自动生成AI讲解
+        if ((request.getExplanation() == null || request.getExplanation().isEmpty()) && aiService != null) {
+            String aiExplanation = aiService.generateExplanation(
+                request.getTitle(), 
+                request.getContent(), 
+                request.getAnswer()
+            );
+            question.setAiExplanation(aiExplanation);
+        }
         
         return questionRepository.save(question);
     }
@@ -60,6 +86,14 @@ public class QuestionService {
         question.setDifficulty(request.getDifficulty());
         question.setTags(request.getTags());
         question.setUpdatedAt(LocalDateTime.now());
+        
+        // 更新关联的知识点
+        if (request.getKnowledgePointIds() != null) {
+            List<KnowledgePoint> knowledgePoints = request.getKnowledgePointIds().stream()
+                .map(knowledgePointService::getKnowledgePointById)
+                .collect(Collectors.toList());
+            question.setKnowledgePoints(knowledgePoints);
+        }
         
         return questionRepository.save(question);
     }

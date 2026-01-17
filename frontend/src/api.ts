@@ -22,13 +22,26 @@ export interface Question {
   id: number;
   title: string;
   content: string;
-  type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK' | 'SHORT_ANSWER';
+  type: 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK' | 'SHORT_ANSWER' | 'ESSAY';
   options?: string;
   answer: string;
   explanation?: string;
+  aiExplanation?: string;
   difficulty: 'EASY' | 'MEDIUM' | 'HARD';
   tags?: string;
   creator?: User;
+  knowledgePoints?: KnowledgePoint[];
+}
+
+export interface KnowledgePoint {
+  id: number;
+  title: string;
+  content: string;
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  category?: string;
+  creator?: User;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface QuestionSet {
@@ -51,6 +64,7 @@ export interface UserAnswer {
   isCorrect: boolean;
   score: number;
   timeSpent?: number;
+  aiFeedback?: string;
   submittedAt: string;
 }
 
@@ -159,6 +173,42 @@ export const collectionAPI = {
   
   isCollected: (userId: number, questionId: number) =>
     api.get<ApiResponse<boolean>>(`/collections/check?userId=${userId}&questionId=${questionId}`),
+};
+
+// Knowledge Point API
+export const knowledgePointAPI = {
+  create: (data: any, userId: number) =>
+    api.post<ApiResponse<KnowledgePoint>>(`/knowledge-points?userId=${userId}`, data),
+  
+  update: (id: number, data: any, userId: number) =>
+    api.put<ApiResponse<KnowledgePoint>>(`/knowledge-points/${id}?userId=${userId}`, data),
+  
+  getById: (id: number) =>
+    api.get<ApiResponse<KnowledgePoint>>(`/knowledge-points/${id}`),
+  
+  getAll: () =>
+    api.get<ApiResponse<KnowledgePoint[]>>('/knowledge-points'),
+  
+  search: (params: { keyword?: string; difficulty?: string; category?: string; page?: number; size?: number }) =>
+    api.get<ApiResponse<any>>('/knowledge-points/search', { params }),
+  
+  getByCreator: (creatorId: number) =>
+    api.get<ApiResponse<KnowledgePoint[]>>(`/knowledge-points/creator/${creatorId}`),
+  
+  getByCategory: (category: string, page?: number, size?: number) =>
+    api.get<ApiResponse<any>>(`/knowledge-points/category/${category}`, { params: { page, size } }),
+  
+  delete: (id: number, userId: number) =>
+    api.delete<ApiResponse<void>>(`/knowledge-points/${id}?userId=${userId}`),
+};
+
+// AI Service API
+export const aiAPI = {
+  generateExplanation: (data: { questionTitle: string; questionContent: string; answer: string }) =>
+    api.post<ApiResponse<string>>('/ai/explain', data),
+  
+  gradeEssay: (data: { questionContent: string; expectedAnswer: string; studentAnswer: string }) =>
+    api.post<ApiResponse<any>>('/ai/grade-essay', data),
 };
 
 export default api;

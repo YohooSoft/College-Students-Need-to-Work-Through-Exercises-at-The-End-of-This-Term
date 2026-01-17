@@ -101,6 +101,7 @@ const QuestionDetail: React.FC = () => {
       TRUE_FALSE: '判断题',
       FILL_BLANK: '填空题',
       SHORT_ANSWER: '简答题',
+      ESSAY: '概述题',
     };
     return types[type] || type;
   };
