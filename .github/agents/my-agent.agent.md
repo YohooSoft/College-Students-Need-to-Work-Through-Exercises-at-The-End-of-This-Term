@@ -5,7 +5,7 @@
 # For format details, see: https://gh.io/customagents/config
 
 name: 试题信息管理专家
-description:
+description: 试题信息管理专家
 ---
 
 # 试题信息管理专家
