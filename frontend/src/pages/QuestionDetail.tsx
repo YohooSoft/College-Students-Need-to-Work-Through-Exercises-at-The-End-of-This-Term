@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { questionAPI, answerAPI, collectionAPI, Question } from '../api';
+import { questionAPI, answerAPI, collectionAPI } from '../api';
+import type { Question } from '../api';
 import { useAuth } from '../AuthContext';
 
 const QuestionDetail: React.FC = () => {

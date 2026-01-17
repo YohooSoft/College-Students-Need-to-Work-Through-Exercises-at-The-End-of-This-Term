@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { questionAPI, Question } from '../api';
+import { questionAPI } from '../api';
+import type { Question } from '../api';
 import { useAuth } from '../AuthContext';
 
 const Home: React.FC = () => {
