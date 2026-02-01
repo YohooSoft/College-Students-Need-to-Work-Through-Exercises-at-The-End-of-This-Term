@@ -27,6 +27,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class QuestionServiceTest {
 
+    private static final Long UNAUTHORIZED_USER_ID = 999L;
+
     @Mock
     private QuestionRepository questionRepository;
 
@@ -110,9 +112,9 @@ class QuestionServiceTest {
         // Assert
         verify(questionRepository).findById(questionId);
         verify(userAnswerRepository).findByQuestionId(questionId);
-        verify(userAnswerRepository, never()).deleteAll(any());
+        verify(userAnswerRepository).deleteAll(Collections.emptyList());
         verify(collectionRepository).findByQuestionId(questionId);
-        verify(collectionRepository, never()).deleteAll(any());
+        verify(collectionRepository).deleteAll(Collections.emptyList());
         verify(questionRepository).delete(testQuestion);
     }
 
@@ -139,13 +141,12 @@ class QuestionServiceTest {
     void deleteQuestion_UnauthorizedUser_ShouldThrowException() {
         // Arrange
         Long questionId = 1L;
-        Long unauthorizedUserId = 999L;
 
         when(questionRepository.findById(questionId)).thenReturn(Optional.of(testQuestion));
 
         // Act & Assert
         assertThrows(IllegalArgumentException.class, () -> {
-            questionService.deleteQuestion(questionId, unauthorizedUserId);
+            questionService.deleteQuestion(questionId, UNAUTHORIZED_USER_ID);
         });
 
         verify(questionRepository).findById(questionId);

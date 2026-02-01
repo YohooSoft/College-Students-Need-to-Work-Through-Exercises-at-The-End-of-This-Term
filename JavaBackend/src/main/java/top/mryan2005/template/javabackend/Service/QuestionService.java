@@ -141,15 +141,11 @@ public class QuestionService {
         
         // 删除所有关联的用户答案记录
         List<UserAnswer> userAnswers = userAnswerRepository.findByQuestionId(id);
-        if (!userAnswers.isEmpty()) {
-            userAnswerRepository.deleteAll(userAnswers);
-        }
+        userAnswerRepository.deleteAll(userAnswers);
         
         // 删除所有关联的收藏记录
         List<Collection> collections = collectionRepository.findByQuestionId(id);
-        if (!collections.isEmpty()) {
-            collectionRepository.deleteAll(collections);
-        }
+        collectionRepository.deleteAll(collections);
         
         questionRepository.delete(question);
     }
