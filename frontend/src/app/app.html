@@ -5,7 +5,12 @@
         题库管理系统
       </a>
       <div style="display: flex; gap: 15px; align-items: center;">
+        <a routerLink="/" style="color: white; text-decoration: none;">题库</a>
+        <a routerLink="/question-sets" style="color: white; text-decoration: none;">试卷</a>
+        <a routerLink="/users" style="color: white; text-decoration: none;">用户</a>
         <ng-container *ngIf="user; else loggedOut">
+          <a routerLink="/my-answers" style="color: white; text-decoration: none;">我的答题</a>
+          <a routerLink="/collections" style="color: white; text-decoration: none;">收藏</a>
           <span>欢迎, {{ user.username }}</span>
           <button 
             (click)="logout()" 
