@@ -152,40 +152,39 @@ export class MarkdownRendererComponent implements OnInit, OnChanges, AfterViewIn
 
     this.isMarkmap = false;
 
-    // Configure marked to support LaTeX
-    const renderer = new marked.Renderer();
-    const originalText = renderer.text.bind(renderer);
+    // First process LaTeX before markdown parsing
+    let processedContent = this.content;
     
-    renderer.text = (text: any) => {
-      // Handle inline LaTeX: $...$
-      text = text.replace(/\$([^\$]+)\$/g, (match: string, latex: string) => {
-        try {
-          return katex.renderToString(latex, { throwOnError: false });
-        } catch (e) {
-          return match;
-        }
-      });
+    // Handle display LaTeX: $$...$$ (must be done before inline)
+    processedContent = processedContent.replace(/\$\$(.+?)\$\$/gs, (match: string, latex: string) => {
+      try {
+        const rendered = katex.renderToString(latex, { displayMode: true, throwOnError: false });
+        return `<div class="katex-display">${rendered}</div>`;
+      } catch (e) {
+        console.error('KaTeX display render error:', e);
+        return match;
+      }
+    });
 
-      // Handle display LaTeX: $$...$$
-      text = text.replace(/\$\$([^\$]+)\$\$/g, (match: string, latex: string) => {
-        try {
-          return katex.renderToString(latex, { displayMode: true, throwOnError: false });
-        } catch (e) {
-          return match;
-        }
-      });
+    // Handle inline LaTeX: $...$
+    processedContent = processedContent.replace(/\$(.+?)\$/g, (match: string, latex: string) => {
+      try {
+        const rendered = katex.renderToString(latex, { throwOnError: false });
+        return `<span class="katex-inline">${rendered}</span>`;
+      } catch (e) {
+        console.error('KaTeX inline render error:', e);
+        return match;
+      }
+    });
 
-      return originalText(text);
-    };
-
+    // Configure marked
     marked.setOptions({
-      renderer: renderer,
       breaks: true,
       gfm: true
     });
 
     // Render markdown
-    this.renderedContent = marked.parse(this.content) as string;
+    this.renderedContent = marked.parse(processedContent) as string;
   }
 
   private renderMarkmap(): void {
