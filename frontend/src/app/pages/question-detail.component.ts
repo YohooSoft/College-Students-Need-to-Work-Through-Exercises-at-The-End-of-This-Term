@@ -81,7 +81,22 @@ export class QuestionDetailComponent implements OnInit {
   getOptions(): any[] {
     if (!this.question?.options) return [];
     try {
-      return JSON.parse(this.question.options);
+      const parsed = JSON.parse(this.question.options);
+      
+      // If parsed is an array, return it as-is
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+      
+      // If parsed is an object, convert it to array format
+      if (typeof parsed === 'object' && parsed !== null) {
+        return Object.entries(parsed).map(([key, value]) => ({
+          key: key,
+          value: value
+        }));
+      }
+      
+      return [];
     } catch {
       return [];
     }
