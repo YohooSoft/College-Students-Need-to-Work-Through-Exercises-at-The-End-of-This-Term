@@ -9,6 +9,7 @@ import java.util.Optional;
 @Repository
 public interface CollectionRepository extends JpaRepository<Collection, Long> {
     List<Collection> findByUserId(Long userId);
+    List<Collection> findByQuestionId(Long questionId);
     Optional<Collection> findByUserIdAndQuestionId(Long userId, Long questionId);
     boolean existsByUserIdAndQuestionId(Long userId, Long questionId);
 }
