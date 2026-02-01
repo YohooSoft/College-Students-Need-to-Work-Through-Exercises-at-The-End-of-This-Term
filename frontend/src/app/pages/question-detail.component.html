@@ -21,7 +21,9 @@
       <div *ngIf="question.type === 'SINGLE_CHOICE'" class="options-section">
         <h3>选项:</h3>
         <div class="options">
-          <div *ngFor="let option of getOptions()" class="option-item">
+          <div *ngFor="let option of getOptions()" 
+               class="option-item" 
+               [class.selected]="selectedOptions.includes(option.key)">
             <label>
               <input 
                 type="radio" 
@@ -41,7 +43,9 @@
       <div *ngIf="question.type === 'MULTIPLE_CHOICE'" class="options-section">
         <h3>选项: (可多选)</h3>
         <div class="options">
-          <div *ngFor="let option of getOptions()" class="option-item">
+          <div *ngFor="let option of getOptions()" 
+               class="option-item"
+               [class.selected]="selectedOptions.includes(option.key)">
             <label>
               <input 
                 type="checkbox" 
@@ -60,7 +64,7 @@
       <div *ngIf="question.type === 'TRUE_FALSE'" class="options-section">
         <h3>请选择:</h3>
         <div class="options">
-          <div class="option-item">
+          <div class="option-item" [class.selected]="selectedOptions.includes('true')">
             <label>
               <input 
                 type="radio" 
@@ -72,7 +76,7 @@
               <span class="option-text">正确</span>
             </label>
           </div>
-          <div class="option-item">
+          <div class="option-item" [class.selected]="selectedOptions.includes('false')">
             <label>
               <input 
                 type="radio" 
@@ -97,8 +101,18 @@
           [rows]="question.type === 'ESSAY' ? 10 : 3"></textarea>
       </div>
 
+      <!-- 已选答案提示 (选择题) -->
+      <div *ngIf="(question.type === 'SINGLE_CHOICE' || question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE') && selectedOptions.length > 0 && !submitted" class="selected-answer-hint">
+        <p><strong>你的选择:</strong> 
+          <span class="selected-options">{{ selectedOptions.join(', ') }}</span>
+        </p>
+      </div>
+
       <div class="action-buttons" *ngIf="!submitted && user">
-        <button class="btn btn-primary" (click)="submitAnswer()">提交答案</button>
+        <button class="btn btn-primary" (click)="submitAnswer()" 
+                [disabled]="(question.type === 'SINGLE_CHOICE' || question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE') && selectedOptions.length === 0">
+          提交答案
+        </button>
       </div>
 
       <div *ngIf="submitted" class="result-section">
