@@ -1,12 +1,200 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { ApiService } from '../services/api.service';
+import { AuthService } from '../services/auth.service';
+import { User } from '../models/models';
+
+interface QuestionOption {
+  key: string;
+  value: string;
+}
 
 @Component({
   selector: 'app-create-question',
   standalone: true,
-  imports: [CommonModule],
-  template: '<div style="max-width: 1200px; margin: 0 auto; padding: 20px;"><h1>创建题目</h1><p>功能开发中...</p></div>',
-  styles: []
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './create-question.component.html',
+  styleUrls: ['./create-question.component.css']
 })
-export class CreateQuestionComponent {
+export class CreateQuestionComponent implements OnInit {
+  user: User | null = null;
+  
+  // Form fields
+  title = '';
+  content = '';
+  type: string = 'SINGLE_CHOICE';
+  difficulty: string = 'MEDIUM';
+  answer = '';
+  explanation = '';
+  tags = '';
+  
+  // Options for choice questions
+  options: QuestionOption[] = [
+    { key: 'A', value: '' },
+    { key: 'B', value: '' },
+    { key: 'C', value: '' },
+    { key: 'D', value: '' }
+  ];
+  
+  // UI state
+  error = '';
+  success = '';
+  submitting = false;
+  
+  // Question types
+  questionTypes = [
+    { value: 'SINGLE_CHOICE', label: '单选题' },
+    { value: 'MULTIPLE_CHOICE', label: '多选题' },
+    { value: 'TRUE_FALSE', label: '判断题' },
+    { value: 'FILL_BLANK', label: '填空题' },
+    { value: 'SHORT_ANSWER', label: '简答题' },
+    { value: 'ESSAY', label: '概述题' }
+  ];
+  
+  // Difficulty levels
+  difficultyLevels = [
+    { value: 'EASY', label: '简单' },
+    { value: 'MEDIUM', label: '中等' },
+    { value: 'HARD', label: '困难' }
+  ];
+
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.authService.user$.subscribe(user => {
+      this.user = user;
+      if (!user) {
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  get isChoiceQuestion(): boolean {
+    return this.type === 'SINGLE_CHOICE' || this.type === 'MULTIPLE_CHOICE';
+  }
+
+  get isTrueFalseQuestion(): boolean {
+    return this.type === 'TRUE_FALSE';
+  }
+
+  addOption(): void {
+    const nextKey = String.fromCharCode(65 + this.options.length); // A=65
+    this.options.push({ key: nextKey, value: '' });
+  }
+
+  removeOption(index: number): void {
+    if (this.options.length > 2) {
+      this.options.splice(index, 1);
+      // Re-assign keys
+      this.options.forEach((opt, idx) => {
+        opt.key = String.fromCharCode(65 + idx);
+      });
+    }
+  }
+
+  handleSubmit(): void {
+    this.error = '';
+    this.success = '';
+
+    // Validation
+    if (!this.title.trim()) {
+      this.error = '请输入题目标题';
+      return;
+    }
+
+    if (!this.content.trim()) {
+      this.error = '请输入题目内容';
+      return;
+    }
+
+    if (!this.answer.trim()) {
+      this.error = '请输入答案';
+      return;
+    }
+
+    if (this.isChoiceQuestion) {
+      const hasEmptyOption = this.options.some(opt => !opt.value.trim());
+      if (hasEmptyOption) {
+        this.error = '请填写所有选项内容';
+        return;
+      }
+    }
+
+    if (!this.user) {
+      this.error = '请先登录';
+      return;
+    }
+
+    this.submitting = true;
+
+    // Prepare request data
+    const requestData: any = {
+      title: this.title.trim(),
+      content: this.content.trim(),
+      type: this.type,
+      difficulty: this.difficulty,
+      answer: this.answer.trim(),
+      explanation: this.explanation.trim(),
+      tags: this.tags.trim()
+    };
+
+    // Add options for choice questions
+    if (this.isChoiceQuestion || this.isTrueFalseQuestion) {
+      const optionsObj: any = {};
+      if (this.isTrueFalseQuestion) {
+        optionsObj['A'] = '正确';
+        optionsObj['B'] = '错误';
+      } else {
+        this.options.forEach(opt => {
+          if (opt.value.trim()) {
+            optionsObj[opt.key] = opt.value.trim();
+          }
+        });
+      }
+      requestData.options = JSON.stringify(optionsObj);
+    }
+
+    // Call API
+    this.apiService.createQuestion(requestData, this.user.id).subscribe({
+      next: (response) => {
+        this.submitting = false;
+        if (response.success) {
+          this.success = '题目创建成功！正在跳转...';
+          setTimeout(() => {
+            this.router.navigate(['/questions', response.data.id]);
+          }, 1500);
+        } else {
+          this.error = response.message || '创建失败';
+        }
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.error = err.error?.message || '创建失败，请重试';
+      }
+    });
+  }
+
+  resetForm(): void {
+    this.title = '';
+    this.content = '';
+    this.type = 'SINGLE_CHOICE';
+    this.difficulty = 'MEDIUM';
+    this.answer = '';
+    this.explanation = '';
+    this.tags = '';
+    this.options = [
+      { key: 'A', value: '' },
+      { key: 'B', value: '' },
+      { key: 'C', value: '' },
+      { key: 'D', value: '' }
+    ];
+    this.error = '';
+    this.success = '';
+  }
 }
