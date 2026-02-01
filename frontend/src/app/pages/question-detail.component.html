@@ -1,0 +1,131 @@
+<div class="question-detail-container">
+  <div *ngIf="loading" class="loading">加载中...</div>
+
+  <div *ngIf="!loading && question" class="question-content">
+    <div class="question-header">
+      <h1>{{ question.title }}</h1>
+      <div class="question-meta">
+        <span class="badge badge-type">{{ getQuestionTypeLabel(question.type) }}</span>
+        <span class="badge badge-difficulty">{{ getDifficultyLabel(question.difficulty) }}</span>
+        <button class="btn-collection" (click)="toggleCollection()" *ngIf="user">
+          {{ isCollected ? '已收藏 ★' : '收藏 ☆' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="question-body">
+      <h3>题目内容:</h3>
+      <div class="content" [innerHTML]="question.content"></div>
+
+      <!-- 单选题 -->
+      <div *ngIf="question.type === 'SINGLE_CHOICE'" class="options-section">
+        <h3>选项:</h3>
+        <div class="options">
+          <div *ngFor="let option of getOptions()" class="option-item">
+            <label>
+              <input 
+                type="radio" 
+                [name]="'option'" 
+                [value]="option.key"
+                [checked]="selectedOptions.includes(option.key)"
+                (change)="toggleOption(option.key)"
+                [disabled]="submitted">
+              <span class="option-key">{{ option.key }}.</span>
+              <span class="option-text">{{ option.value }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 多选题 -->
+      <div *ngIf="question.type === 'MULTIPLE_CHOICE'" class="options-section">
+        <h3>选项: (可多选)</h3>
+        <div class="options">
+          <div *ngFor="let option of getOptions()" class="option-item">
+            <label>
+              <input 
+                type="checkbox" 
+                [value]="option.key"
+                [checked]="selectedOptions.includes(option.key)"
+                (change)="toggleOption(option.key)"
+                [disabled]="submitted">
+              <span class="option-key">{{ option.key }}.</span>
+              <span class="option-text">{{ option.value }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 判断题 -->
+      <div *ngIf="question.type === 'TRUE_FALSE'" class="options-section">
+        <h3>请选择:</h3>
+        <div class="options">
+          <div class="option-item">
+            <label>
+              <input 
+                type="radio" 
+                name="trueFalse" 
+                value="true"
+                [checked]="selectedOptions.includes('true')"
+                (change)="toggleOption('true')"
+                [disabled]="submitted">
+              <span class="option-text">正确</span>
+            </label>
+          </div>
+          <div class="option-item">
+            <label>
+              <input 
+                type="radio" 
+                name="trueFalse" 
+                value="false"
+                [checked]="selectedOptions.includes('false')"
+                (change)="toggleOption('false')"
+                [disabled]="submitted">
+              <span class="option-text">错误</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 填空题 / 简答题 / 概述题 -->
+      <div *ngIf="question.type === 'FILL_BLANK' || question.type === 'SHORT_ANSWER' || question.type === 'ESSAY'" class="answer-section">
+        <h3>你的答案:</h3>
+        <textarea 
+          [(ngModel)]="userAnswer" 
+          [disabled]="submitted"
+          [placeholder]="question.type === 'ESSAY' ? '请输入你的详细回答...' : '请输入你的答案...'"
+          [rows]="question.type === 'ESSAY' ? 10 : 3"></textarea>
+      </div>
+
+      <div class="action-buttons" *ngIf="!submitted && user">
+        <button class="btn btn-primary" (click)="submitAnswer()">提交答案</button>
+      </div>
+
+      <div *ngIf="submitted" class="result-section">
+        <div [class]="isCorrect ? 'result-correct' : 'result-incorrect'">
+          <h3>{{ isCorrect ? '✓ 回答正确!' : '✗ 回答错误' }}</h3>
+          <p>得分: {{ score }}</p>
+        </div>
+
+        <div class="correct-answer">
+          <h3>正确答案:</h3>
+          <p>{{ question.answer }}</p>
+        </div>
+
+        <div *ngIf="question.explanation" class="explanation">
+          <h3>答案解析:</h3>
+          <p>{{ question.explanation }}</p>
+        </div>
+
+        <div *ngIf="question.aiExplanation" class="ai-explanation">
+          <h3>AI讲解:</h3>
+          <p>{{ question.aiExplanation }}</p>
+        </div>
+      </div>
+
+      <div *ngIf="!user" class="login-prompt">
+        <p>请先登录后再答题</p>
+      </div>
+    </div>
+  </div>
+</div>

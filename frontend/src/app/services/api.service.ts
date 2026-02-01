@@ -32,6 +32,17 @@ export class ApiService {
     return this.http.get<ApiResponse<User>>(`${this.baseUrl}/auth/user/${id}`);
   }
 
+  searchUsers(keyword?: string): Observable<ApiResponse<User[]>> {
+    const url = keyword 
+      ? `${this.baseUrl}/auth/users/search?keyword=${encodeURIComponent(keyword)}`
+      : `${this.baseUrl}/auth/users/search`;
+    return this.http.get<ApiResponse<User[]>>(url);
+  }
+
+  getUserStatistics(userId: number): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/auth/user/${userId}/statistics`);
+  }
+
   // Question API
   createQuestion(data: any, userId: number): Observable<ApiResponse<Question>> {
     return this.http.post<ApiResponse<Question>>(`${this.baseUrl}/questions?userId=${userId}`, data);

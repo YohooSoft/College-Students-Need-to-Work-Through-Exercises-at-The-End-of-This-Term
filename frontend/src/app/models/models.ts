@@ -69,3 +69,15 @@ export interface ApiResponse<T> {
   message: string;
   data: T;
 }
+
+export interface UserStatistics {
+  userId: number;
+  username: string;
+  fullName: string;
+  role: string;
+  completedQuestionsCount: number;
+  correctAnswersCount: number;
+  addedQuestionsCount: number;
+  createdQuestionSetsCount: number;
+  totalScore: number;
+}
