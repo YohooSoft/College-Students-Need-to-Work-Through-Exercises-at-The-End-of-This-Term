@@ -105,6 +105,18 @@ import { Markmap } from 'markmap-view';
       text-decoration: underline;
     }
 
+    /* KaTeX inline math spacing */
+    .markdown-content .katex {
+      margin: 0 0.2em;
+      display: inline-block;
+    }
+
+    /* KaTeX display math spacing */
+    .markdown-content .katex-display {
+      margin: 1em 0;
+      display: block;
+    }
+
     .markmap-svg {
       width: 100%;
       height: 500px;
