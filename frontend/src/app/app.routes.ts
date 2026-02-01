@@ -7,6 +7,7 @@ import { CreateQuestionComponent } from './pages/create-question.component';
 import { QuestionSetsComponent } from './pages/question-sets.component';
 import { CollectionsComponent } from './pages/collections.component';
 import { MyAnswersComponent } from './pages/my-answers.component';
+import { UsersComponent } from './pages/users.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -16,5 +17,6 @@ export const routes: Routes = [
   { path: 'questions/create', component: CreateQuestionComponent },
   { path: 'question-sets', component: QuestionSetsComponent },
   { path: 'collections', component: CollectionsComponent },
-  { path: 'my-answers', component: MyAnswersComponent }
+  { path: 'my-answers', component: MyAnswersComponent },
+  { path: 'users', component: UsersComponent }
 ];

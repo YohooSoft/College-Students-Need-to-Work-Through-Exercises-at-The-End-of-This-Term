@@ -38,9 +38,15 @@ export interface QuestionSet {
   description?: string;
   creator: User;
   questions: Question[];
+  questionScores?: string; // JSON string of question ID to score mapping
   timeLimit?: number;
   totalScore?: number;
   isPublic: boolean;
+}
+
+export interface QuestionScore {
+  questionId: number;
+  score: number;
 }
 
 export interface UserAnswer {
@@ -68,4 +74,16 @@ export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+}
+
+export interface UserStatistics {
+  userId: number;
+  username: string;
+  fullName: string;
+  role: string;
+  completedQuestionsCount: number;
+  correctAnswersCount: number;
+  addedQuestionsCount: number;
+  createdQuestionSetsCount: number;
+  totalScore: number;
 }

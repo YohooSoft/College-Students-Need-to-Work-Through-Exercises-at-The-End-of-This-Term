@@ -1,0 +1,90 @@
+<div class="users-container">
+  <h1>用户搜索</h1>
+
+  <div class="search-section">
+    <input 
+      type="text" 
+      [(ngModel)]="searchKeyword" 
+      (keypress)="onKeyPress($event)"
+      placeholder="搜索用户名或姓名..."
+      class="search-input">
+    <button (click)="handleSearch()" class="btn-search">搜索</button>
+  </div>
+
+  <div *ngIf="loading" class="loading">加载中...</div>
+
+  <div *ngIf="!loading && users.length > 0" class="users-grid">
+    <div *ngFor="let user of users" class="user-card" (click)="viewUserDetails(user)">
+      <div class="user-avatar">
+        {{ user.username.charAt(0).toUpperCase() }}
+      </div>
+      <div class="user-info">
+        <h3>{{ user.username }}</h3>
+        <p class="user-fullname">{{ user.fullName }}</p>
+        <span [class]="'badge ' + getRoleBadgeClass(user.role)">
+          {{ getRoleLabel(user.role) }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && users.length === 0" class="empty-state">
+    <p>没有找到匹配的用户</p>
+  </div>
+
+  <!-- User Details Modal -->
+  <div *ngIf="selectedUser" class="modal-overlay" (click)="closeUserDetails()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <button class="close-button" (click)="closeUserDetails()">×</button>
+      
+      <div class="user-profile">
+        <div class="profile-header">
+          <div class="profile-avatar">
+            {{ selectedUser.username.charAt(0).toUpperCase() }}
+          </div>
+          <div class="profile-info">
+            <h2>{{ selectedUser.username }}</h2>
+            <p>{{ selectedUser.fullName }}</p>
+            <span [class]="'badge ' + getRoleBadgeClass(selectedUser.role)">
+              {{ getRoleLabel(selectedUser.role) }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="selectedUserStats" class="user-statistics">
+          <h3>用户统计</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-label">完成题目</div>
+              <div class="stat-value">{{ selectedUserStats.completedQuestionsCount }}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">正确答案</div>
+              <div class="stat-value">{{ selectedUserStats.correctAnswersCount }}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">正确率</div>
+              <div class="stat-value">
+                {{ selectedUserStats.completedQuestionsCount > 0 
+                  ? ((selectedUserStats.correctAnswersCount / selectedUserStats.completedQuestionsCount) * 100).toFixed(2) 
+                  : '0.00' }}%
+              </div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">总得分</div>
+              <div class="stat-value">{{ selectedUserStats.totalScore }}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">添加题目</div>
+              <div class="stat-value">{{ selectedUserStats.addedQuestionsCount }}</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">创建试卷</div>
+              <div class="stat-value">{{ selectedUserStats.createdQuestionSetsCount }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

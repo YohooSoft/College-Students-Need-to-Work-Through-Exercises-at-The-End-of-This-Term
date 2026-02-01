@@ -8,6 +8,7 @@ import {
   UserAnswer,
   Collection,
   KnowledgePoint,
+  UserStatistics,
   ApiResponse
 } from '../models/models';
 
@@ -30,6 +31,17 @@ export class ApiService {
 
   getUserById(id: number): Observable<ApiResponse<User>> {
     return this.http.get<ApiResponse<User>>(`${this.baseUrl}/auth/user/${id}`);
+  }
+
+  searchUsers(keyword?: string): Observable<ApiResponse<User[]>> {
+    const url = keyword 
+      ? `${this.baseUrl}/auth/users/search?keyword=${encodeURIComponent(keyword)}`
+      : `${this.baseUrl}/auth/users/search`;
+    return this.http.get<ApiResponse<User[]>>(url);
+  }
+
+  getUserStatistics(userId: number): Observable<ApiResponse<UserStatistics>> {
+    return this.http.get<ApiResponse<UserStatistics>>(`${this.baseUrl}/auth/user/${userId}/statistics`);
   }
 
   // Question API

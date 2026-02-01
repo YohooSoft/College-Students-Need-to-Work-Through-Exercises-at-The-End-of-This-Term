@@ -1,0 +1,85 @@
+<div class="my-answers-container">
+  <h1>我的答题记录</h1>
+
+  <div *ngIf="loading" class="loading">加载中...</div>
+
+  <div *ngIf="!loading && statistics" class="statistics-section">
+    <h2>统计信息</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">完成题目数</div>
+        <div class="stat-value">{{ statistics.completedQuestionsCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">正确答案数</div>
+        <div class="stat-value">{{ statistics.correctAnswersCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">正确率</div>
+        <div class="stat-value">{{ getAccuracyRate() }}%</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">总得分</div>
+        <div class="stat-value">{{ statistics.totalScore }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">添加题目数</div>
+        <div class="stat-value">{{ statistics.addedQuestionsCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">创建试卷数</div>
+        <div class="stat-value">{{ statistics.createdQuestionSetsCount }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && answers.length > 0" class="answers-section">
+    <h2>答题历史</h2>
+    <div class="answers-list">
+      <div *ngFor="let answer of answers" class="answer-card">
+        <div class="answer-header">
+          <h3>{{ answer.question.title }}</h3>
+          <span [class]="answer.isCorrect ? 'badge-correct' : 'badge-incorrect'">
+            {{ answer.isCorrect ? '✓ 正确' : '✗ 错误' }}
+          </span>
+        </div>
+        <div class="answer-details">
+          <div class="detail-item">
+            <span class="label">题型:</span>
+            <span>{{ getQuestionTypeLabel(answer.question.type) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">得分:</span>
+            <span>{{ answer.score }}</span>
+          </div>
+          <div class="detail-item" *ngIf="answer.timeSpent">
+            <span class="label">用时:</span>
+            <span>{{ answer.timeSpent }}秒</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">提交时间:</span>
+            <span>{{ answer.submittedAt | date: 'yyyy-MM-dd HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="answer-content">
+          <div class="user-answer">
+            <strong>我的答案:</strong>
+            <app-markdown-renderer [content]="answer.answer"></app-markdown-renderer>
+          </div>
+          <div class="correct-answer">
+            <strong>正确答案:</strong>
+            <app-markdown-renderer [content]="answer.question.answer"></app-markdown-renderer>
+          </div>
+          <div *ngIf="answer.aiFeedback" class="ai-feedback">
+            <strong>AI评语:</strong>
+            <app-markdown-renderer [content]="answer.aiFeedback"></app-markdown-renderer>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && answers.length === 0" class="empty-state">
+    <p>还没有答题记录，赶快去做题吧！</p>
+  </div>
+</div>

@@ -26,4 +26,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     
     @Query("SELECT q FROM Question q WHERE q.tags LIKE CONCAT('%', :tag, '%')")
     Page<Question> findByTag(@Param("tag") String tag, Pageable pageable);
+    
+    @Query("SELECT COUNT(q) FROM Question q WHERE q.creator.id = :creatorId")
+    Long countByCreatorId(@Param("creatorId") Long creatorId);
 }
