@@ -180,7 +180,7 @@
     <!-- 提交按钮 -->
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="submitting">
-        {{ submitting ? (isEditMode ? '更新中...' : '创建中...') : (isEditMode ? '更新题目' : '创建题目') }}
+        {{ getSubmitButtonText() }}
       </button>
       <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="submitting">
         重置

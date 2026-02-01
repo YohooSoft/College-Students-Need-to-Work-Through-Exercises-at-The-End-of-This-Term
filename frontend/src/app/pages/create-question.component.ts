@@ -136,7 +136,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
             this.error = '无权限编辑此题目';
             setTimeout(() => {
               this.router.navigate(['/']);
-            }, 2000);
+            }, 500);
             return;
           }
 
@@ -310,5 +310,12 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     ];
     this.error = '';
     this.success = '';
+  }
+
+  getSubmitButtonText(): string {
+    if (this.submitting) {
+      return this.isEditMode ? '更新中...' : '创建中...';
+    }
+    return this.isEditMode ? '更新题目' : '创建题目';
   }
 }

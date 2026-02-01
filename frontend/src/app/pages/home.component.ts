@@ -108,7 +108,7 @@ export class HomeComponent implements OnInit {
   }
 
   getPreviewContent(content: string, maxLength: number = 200): string {
-    if (!content || content.length <= maxLength) {
+    if (!content || content.length < maxLength) {
       return content;
     }
     
