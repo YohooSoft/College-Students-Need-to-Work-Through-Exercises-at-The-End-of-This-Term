@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
-import { Question, User } from '../models/models';
+import { Question, QuestionOption, User } from '../models/models';
 import { MarkdownRendererComponent } from '../components/markdown-renderer.component';
 
 @Component({
@@ -78,7 +78,7 @@ export class QuestionDetailComponent implements OnInit {
     }
   }
 
-  getOptions(): any[] {
+  getOptions(): QuestionOption[] {
     if (!this.question?.options) return [];
     try {
       const parsed = JSON.parse(this.question.options);
@@ -91,8 +91,8 @@ export class QuestionDetailComponent implements OnInit {
       // If parsed is an object, convert it to array format
       if (typeof parsed === 'object' && parsed !== null) {
         return Object.entries(parsed).map(([key, value]) => ({
-          key: key,
-          value: value
+          key,
+          value: String(value)
         }));
       }
       
