@@ -1,5 +1,6 @@
 package top.mryan2005.template.javabackend.Pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
     
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
     
