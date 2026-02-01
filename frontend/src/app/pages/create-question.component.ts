@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { User } from '../models/models';
@@ -11,6 +12,17 @@ interface QuestionOption {
   value: string;
 }
 
+interface QuestionCreateRequest {
+  title: string;
+  content: string;
+  type: string;
+  difficulty: string;
+  answer: string;
+  explanation: string;
+  tags: string;
+  options?: string;
+}
+
 @Component({
   selector: 'app-create-question',
   standalone: true,
@@ -18,8 +30,9 @@ interface QuestionOption {
   templateUrl: './create-question.component.html',
   styleUrls: ['./create-question.component.css']
 })
-export class CreateQuestionComponent implements OnInit {
+export class CreateQuestionComponent implements OnInit, OnDestroy {
   user: User | null = null;
+  private userSubscription?: Subscription;
   
   // Form fields
   title = '';
@@ -67,12 +80,18 @@ export class CreateQuestionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.user$.subscribe(user => {
+    this.userSubscription = this.authService.user$.subscribe(user => {
       this.user = user;
       if (!user) {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   get isChoiceQuestion(): boolean {
@@ -134,7 +153,7 @@ export class CreateQuestionComponent implements OnInit {
     this.submitting = true;
 
     // Prepare request data
-    const requestData: any = {
+    const requestData: QuestionCreateRequest = {
       title: this.title.trim(),
       content: this.content.trim(),
       type: this.type,
@@ -146,7 +165,7 @@ export class CreateQuestionComponent implements OnInit {
 
     // Add options for choice questions
     if (this.isChoiceQuestion || this.isTrueFalseQuestion) {
-      const optionsObj: any = {};
+      const optionsObj: Record<string, string> = {};
       if (this.isTrueFalseQuestion) {
         optionsObj['A'] = '正确';
         optionsObj['B'] = '错误';
