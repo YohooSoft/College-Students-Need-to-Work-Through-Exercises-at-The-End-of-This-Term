@@ -8,8 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 import top.mryan2005.template.javabackend.Pojo.Question;
 import top.mryan2005.template.javabackend.Pojo.KnowledgePoint;
 import top.mryan2005.template.javabackend.Pojo.User;
+import top.mryan2005.template.javabackend.Pojo.UserAnswer;
+import top.mryan2005.template.javabackend.Pojo.Collection;
 import top.mryan2005.template.javabackend.Pojo.Dto.QuestionRequest;
 import top.mryan2005.template.javabackend.Repository.QuestionRepository;
+import top.mryan2005.template.javabackend.Repository.UserAnswerRepository;
+import top.mryan2005.template.javabackend.Repository.CollectionRepository;
 import top.mryan2005.template.javabackend.Exception.ResourceNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +33,12 @@ public class QuestionService {
     
     @Autowired(required = false)
     private AIService aiService;
+    
+    @Autowired
+    private UserAnswerRepository userAnswerRepository;
+    
+    @Autowired
+    private CollectionRepository collectionRepository;
     
     @Transactional
     public Question createQuestion(QuestionRequest request, Long userId) {
@@ -127,6 +137,18 @@ public class QuestionService {
         
         if (!question.getCreator().getId().equals(userId)) {
             throw new IllegalArgumentException("无权限删除此题目");
+        }
+        
+        // 删除所有关联的用户答案记录
+        List<UserAnswer> userAnswers = userAnswerRepository.findByQuestionId(id);
+        if (!userAnswers.isEmpty()) {
+            userAnswerRepository.deleteAll(userAnswers);
+        }
+        
+        // 删除所有关联的收藏记录
+        List<Collection> collections = collectionRepository.findByQuestionId(id);
+        if (!collections.isEmpty()) {
+            collectionRepository.deleteAll(collections);
         }
         
         questionRepository.delete(question);
