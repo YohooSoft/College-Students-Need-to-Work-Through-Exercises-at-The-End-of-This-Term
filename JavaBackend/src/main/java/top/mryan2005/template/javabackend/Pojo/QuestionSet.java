@@ -36,6 +36,9 @@ public class QuestionSet {
     )
     private List<Question> questions;
     
+    @Column(name = "question_scores", columnDefinition = "TEXT")
+    private String questionScores; // JSON格式存储题目ID和分值的映射 {"questionId": score}
+    
     @Column(name = "time_limit")
     private Integer timeLimit; // 时间限制（分钟）
     

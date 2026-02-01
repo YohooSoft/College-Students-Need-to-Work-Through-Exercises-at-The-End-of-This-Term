@@ -38,9 +38,15 @@ export interface QuestionSet {
   description?: string;
   creator: User;
   questions: Question[];
+  questionScores?: string; // JSON string of question ID to score mapping
   timeLimit?: number;
   totalScore?: number;
   isPublic: boolean;
+}
+
+export interface QuestionScore {
+  questionId: number;
+  score: number;
 }
 
 export interface UserAnswer {
