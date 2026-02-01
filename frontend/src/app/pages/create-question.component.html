@@ -1,13 +1,17 @@
 <div class="create-question-container">
   <div class="header">
-    <h1>创建题目</h1>
+    <h1>{{ isEditMode ? '编辑题目' : '创建题目' }}</h1>
     <a routerLink="/" class="back-link">← 返回首页</a>
   </div>
 
   <div *ngIf="error" class="alert alert-error">{{ error }}</div>
   <div *ngIf="success" class="alert alert-success">{{ success }}</div>
 
-  <form (ngSubmit)="handleSubmit()" class="question-form">
+  <div *ngIf="isEditMode && loadingQuestion" style="padding: 20px; text-align: center;">
+    <p>加载题目数据中...</p>
+  </div>
+
+  <form (ngSubmit)="handleSubmit()" class="question-form" *ngIf="!loadingQuestion">
     <!-- 题目标题 -->
     <div class="form-group">
       <label for="title">题目标题 <span class="required">*</span></label>
@@ -176,7 +180,7 @@
     <!-- 提交按钮 -->
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="submitting">
-        {{ submitting ? '创建中...' : '创建题目' }}
+        {{ getSubmitButtonText() }}
       </button>
       <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="submitting">
         重置

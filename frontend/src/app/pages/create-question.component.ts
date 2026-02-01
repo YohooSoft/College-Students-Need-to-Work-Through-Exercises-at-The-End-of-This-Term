@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
-import { User } from '../models/models';
+import { User, Question } from '../models/models';
 
 interface QuestionOption {
   key: string;
@@ -33,7 +33,12 @@ interface QuestionCreateRequest {
 export class CreateQuestionComponent implements OnInit, OnDestroy {
   user: User | null = null;
   private userSubscription?: Subscription;
-  
+
+  // Edit mode
+  isEditMode = false;
+  questionId?: number;
+  loadingQuestion = false;
+
   // Form fields
   title = '';
   content = '';
@@ -42,7 +47,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   answer = '';
   explanation = '';
   tags = '';
-  
+
   // Options for choice questions
   options: QuestionOption[] = [
     { key: 'A', value: '' },
@@ -50,12 +55,12 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     { key: 'C', value: '' },
     { key: 'D', value: '' }
   ];
-  
+
   // UI state
   error = '';
   success = '';
   submitting = false;
-  
+
   // Question types
   questionTypes = [
     { value: 'SINGLE_CHOICE', label: '单选题' },
@@ -65,7 +70,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     { value: 'SHORT_ANSWER', label: '简答题' },
     { value: 'ESSAY', label: '概述题' }
   ];
-  
+
   // Difficulty levels
   difficultyLevels = [
     { value: 'EASY', label: '简单' },
@@ -76,14 +81,30 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    // Check if we're in edit mode first
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.questionId = +id;
+    }
+
+    // Subscribe to user changes
     this.userSubscription = this.authService.user$.subscribe(user => {
       this.user = user;
       if (!user) {
         this.router.navigate(['/login']);
+        return;
+      }
+
+      // Load question data after user is available (only in edit mode)
+      if (this.isEditMode && this.questionId && !this.loadingQuestion) {
+        this.loadQuestion(this.questionId);
       }
     });
   }
@@ -100,6 +121,65 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
 
   get isTrueFalseQuestion(): boolean {
     return this.type === 'TRUE_FALSE';
+  }
+
+  private isValidOptionsObject(obj: any): boolean {
+    return obj && typeof obj === 'object' && !Array.isArray(obj);
+  }
+
+  loadQuestion(id: number): void {
+    this.loadingQuestion = true;
+    this.apiService.getQuestionById(id).subscribe({
+      next: (response) => {
+        this.loadingQuestion = false;
+        if (response.success) {
+          const question: Question = response.data;
+
+          // Check if user is the creator
+          // Note: If creator is null/undefined (e.g., legacy questions), allow edit.
+          // Backend will still enforce permissions if needed.
+          if (question.creator && this.user && question.creator.id !== this.user.id) {
+            this.error = '无权限编辑此题目';
+            // Navigate immediately - user has already seen the error
+            this.router.navigate(['/']);
+            return;
+          }
+
+          // Load question data into form
+          this.title = question.title;
+          this.content = question.content;
+          this.type = question.type;
+          this.difficulty = question.difficulty;
+          this.answer = question.answer;
+          this.explanation = question.explanation || '';
+          this.tags = question.tags || '';
+
+          // Load options for choice questions
+          if (question.options) {
+            try {
+              const parsedOptions = JSON.parse(question.options);
+              // Check that parsedOptions is a valid object (not null, not array)
+              if (this.isValidOptionsObject(parsedOptions)) {
+                this.options = Object.entries(parsedOptions).map(([key, value]) => ({
+                  key,
+                  value: String(value)
+                }));
+              }
+            } catch (e) {
+              console.error('Failed to parse options:', e);
+            }
+          }
+        } else {
+          this.error = response.message || '加载题目失败';
+        }
+        this.changeDetector.markForCheck();
+      },
+      error: (err) => {
+        this.loadingQuestion = false;
+        this.error = '加载题目失败: ' + (err.error?.message || err.message || '未知错误');
+        console.error('Failed to load question:', err);
+      }
+    });
   }
 
   addOption(): void {
@@ -179,24 +259,45 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
       requestData.options = JSON.stringify(optionsObj);
     }
 
-    // Call API
-    this.apiService.createQuestion(requestData, this.user.id).subscribe({
-      next: (response) => {
-        this.submitting = false;
-        if (response.success) {
-          this.success = '题目创建成功！正在跳转...';
-          setTimeout(() => {
-            this.router.navigate(['/questions', response.data.id]);
-          }, 1500);
-        } else {
-          this.error = response.message || '创建失败';
+    // Call API - either create or update
+    if (this.isEditMode && this.questionId) {
+      this.apiService.updateQuestion(this.questionId, requestData, this.user.id).subscribe({
+        next: (response) => {
+          this.submitting = false;
+          if (response.success) {
+            this.success = '题目更新成功！正在跳转...';
+            setTimeout(() => {
+              this.router.navigate(['/questions', response.data.id]);
+            }, 1500);
+          } else {
+            this.error = response.message || '更新失败';
+          }
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.error = err.error?.message || '更新失败，请重试';
         }
-      },
-      error: (err) => {
-        this.submitting = false;
-        this.error = err.error?.message || '创建失败，请重试';
-      }
-    });
+      });
+    } else {
+      // Call API
+      this.apiService.createQuestion(requestData, this.user.id).subscribe({
+        next: (response) => {
+          this.submitting = false;
+          if (response.success) {
+            this.success = '题目创建成功！正在跳转...';
+            setTimeout(() => {
+              this.router.navigate(['/questions', response.data.id]);
+            }, 1500);
+          } else {
+            this.error = response.message || '创建失败';
+          }
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.error = err.error?.message || '创建失败，请重试';
+        }
+      });
+    }
   }
 
   resetForm(): void {
@@ -215,5 +316,12 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     ];
     this.error = '';
     this.success = '';
+  }
+
+  getSubmitButtonText(): string {
+    if (this.submitting) {
+      return this.isEditMode ? '更新中...' : '创建中...';
+    }
+    return this.isEditMode ? '更新题目' : '创建题目';
   }
 }

@@ -60,15 +60,27 @@
             </span>
           </div>
         </div>
-        <p style="color: #666; margin-bottom: 10px;">{{ question.content.substring(0, 200) }}...</p>
+        <p style="color: #666; margin-bottom: 10px;">
+          <app-markdown-renderer [content]="getPreviewContent(question.content, 200)"></app-markdown-renderer>
+        </p>
         <div *ngIf="question.tags" style="margin-bottom: 10px;">
           <span *ngFor="let tag of getTags(question.tags)" style="margin-right: 5px; padding: 2px 8px; background: #e0e0e0; border-radius: 3px; font-size: 12px;">
             {{ tag }}
           </span>
         </div>
-        <a [routerLink]="['/questions', question.id]" style="color: #007bff; text-decoration: none;">
-          查看详情 →
-        </a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <a [routerLink]="['/questions', question.id]" style="color: #007bff; text-decoration: none;">
+            查看详情 →
+          </a>
+          <div *ngIf="isCreator(question)" style="display: flex; gap: 10px;">
+            <button (click)="editQuestion(question.id)" style="padding: 5px 12px; background: #ffc107; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+              编辑
+            </button>
+            <button (click)="deleteQuestion(question)" style="padding: 5px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+              删除
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
