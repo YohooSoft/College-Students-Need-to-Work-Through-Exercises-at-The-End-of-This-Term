@@ -33,7 +33,9 @@
                 (change)="toggleOption(option.key)"
                 [disabled]="submitted">
               <span class="option-key">{{ option.key }}.</span>
-              <span class="option-text">{{ option.value }}</span>
+              <span class="option-text">
+                <app-markdown-renderer [content]="option.value"></app-markdown-renderer>
+              </span>
             </label>
           </div>
         </div>
@@ -54,7 +56,9 @@
                 (change)="toggleOption(option.key)"
                 [disabled]="submitted">
               <span class="option-key">{{ option.key }}.</span>
-              <span class="option-text">{{ option.value }}</span>
+              <span class="option-text">
+                <app-markdown-renderer [content]="option.value"></app-markdown-renderer>
+              </span>
             </label>
           </div>
         </div>
