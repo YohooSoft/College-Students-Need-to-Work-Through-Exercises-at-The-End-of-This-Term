@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Component, OnInit, OnDestroy, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
@@ -33,12 +33,12 @@ interface QuestionCreateRequest {
 export class CreateQuestionComponent implements OnInit, OnDestroy {
   user: User | null = null;
   private userSubscription?: Subscription;
-  
+
   // Edit mode
   isEditMode = false;
   questionId?: number;
   loadingQuestion = false;
-  
+
   // Form fields
   title = '';
   content = '';
@@ -47,7 +47,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   answer = '';
   explanation = '';
   tags = '';
-  
+
   // Options for choice questions
   options: QuestionOption[] = [
     { key: 'A', value: '' },
@@ -55,12 +55,12 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     { key: 'C', value: '' },
     { key: 'D', value: '' }
   ];
-  
+
   // UI state
   error = '';
   success = '';
   submitting = false;
-  
+
   // Question types
   questionTypes = [
     { value: 'SINGLE_CHOICE', label: '单选题' },
@@ -70,7 +70,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     { value: 'SHORT_ANSWER', label: '简答题' },
     { value: 'ESSAY', label: '概述题' }
   ];
-  
+
   // Difficulty levels
   difficultyLevels = [
     { value: 'EASY', label: '简单' },
@@ -82,7 +82,8 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +101,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
         return;
       }
-      
+
       // Load question data after user is available (only in edit mode)
       if (this.isEditMode && this.questionId && !this.loadingQuestion) {
         this.loadQuestion(this.questionId);
@@ -133,7 +134,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         this.loadingQuestion = false;
         if (response.success) {
           const question: Question = response.data;
-          
+
           // Check if user is the creator
           // Note: If creator is null/undefined (e.g., legacy questions), allow edit.
           // Backend will still enforce permissions if needed.
@@ -171,6 +172,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         } else {
           this.error = response.message || '加载题目失败';
         }
+        this.changeDetector.markForCheck();
       },
       error: (err) => {
         this.loadingQuestion = false;
