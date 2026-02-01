@@ -82,18 +82,18 @@ export class QuestionDetailComponent implements OnInit {
     if (!this.question?.options) return [];
     try {
       const parsed = JSON.parse(this.question.options);
-      
+
       // If parsed is an array, validate and return it
       if (Array.isArray(parsed)) {
         // Validate that each element has key and value properties
-        return parsed.filter(item => 
+        return parsed.filter(item =>
           item && typeof item === 'object' && 'key' in item && 'value' in item
         ).map(item => ({
           key: String(item.key),
           value: String(item.value)
         }));
       }
-      
+
       // If parsed is an object, convert it to array format
       if (typeof parsed === 'object' && parsed !== null) {
         return Object.entries(parsed).map(([key, value]) => ({
@@ -101,7 +101,7 @@ export class QuestionDetailComponent implements OnInit {
           value: String(value)
         }));
       }
-      
+
       return [];
     } catch {
       return [];
@@ -142,6 +142,7 @@ export class QuestionDetailComponent implements OnInit {
           this.isCorrect = response.data.isCorrect;
           this.score = response.data.score;
         }
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to submit answer:', error);
@@ -163,6 +164,7 @@ export class QuestionDetailComponent implements OnInit {
           if (response.success) {
             this.isCollected = true;
             alert('收藏成功！');
+            this.changeDetector.markForCheck();
           }
         },
         error: (error) => {
@@ -195,8 +197,8 @@ export class QuestionDetailComponent implements OnInit {
   }
 
   isChoiceQuestion(): boolean {
-    return this.question?.type === 'SINGLE_CHOICE' || 
-           this.question?.type === 'MULTIPLE_CHOICE' || 
+    return this.question?.type === 'SINGLE_CHOICE' ||
+           this.question?.type === 'MULTIPLE_CHOICE' ||
            this.question?.type === 'TRUE_FALSE';
   }
 }
