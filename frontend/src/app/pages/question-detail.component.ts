@@ -83,9 +83,15 @@ export class QuestionDetailComponent implements OnInit {
     try {
       const parsed = JSON.parse(this.question.options);
       
-      // If parsed is an array, return it as-is
+      // If parsed is an array, validate and return it
       if (Array.isArray(parsed)) {
-        return parsed;
+        // Validate that each element has key and value properties
+        return parsed.filter(item => 
+          item && typeof item === 'object' && 'key' in item && 'value' in item
+        ).map(item => ({
+          key: String(item.key),
+          value: String(item.value)
+        }));
       }
       
       // If parsed is an object, convert it to array format
