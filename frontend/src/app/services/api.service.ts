@@ -8,6 +8,7 @@ import {
   UserAnswer,
   Collection,
   KnowledgePoint,
+  UserStatistics,
   ApiResponse
 } from '../models/models';
 
@@ -39,8 +40,8 @@ export class ApiService {
     return this.http.get<ApiResponse<User[]>>(url);
   }
 
-  getUserStatistics(userId: number): Observable<ApiResponse<any>> {
-    return this.http.get<ApiResponse<any>>(`${this.baseUrl}/auth/user/${userId}/statistics`);
+  getUserStatistics(userId: number): Observable<ApiResponse<UserStatistics>> {
+    return this.http.get<ApiResponse<UserStatistics>>(`${this.baseUrl}/auth/user/${userId}/statistics`);
   }
 
   // Question API

@@ -63,13 +63,16 @@
         </div>
         <div class="answer-content">
           <div class="user-answer">
-            <strong>我的答案:</strong> {{ answer.answer }}
+            <strong>我的答案:</strong>
+            <app-markdown-renderer [content]="answer.answer"></app-markdown-renderer>
           </div>
           <div class="correct-answer">
-            <strong>正确答案:</strong> {{ answer.question.answer }}
+            <strong>正确答案:</strong>
+            <app-markdown-renderer [content]="answer.question.answer"></app-markdown-renderer>
           </div>
           <div *ngIf="answer.aiFeedback" class="ai-feedback">
-            <strong>AI评语:</strong> {{ answer.aiFeedback }}
+            <strong>AI评语:</strong>
+            <app-markdown-renderer [content]="answer.aiFeedback"></app-markdown-renderer>
           </div>
         </div>
       </div>

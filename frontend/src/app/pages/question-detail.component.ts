@@ -5,11 +5,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { Question, User } from '../models/models';
+import { MarkdownRendererComponent } from '../components/markdown-renderer.component';
 
 @Component({
   selector: 'app-question-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MarkdownRendererComponent],
   templateUrl: './question-detail.component.html',
   styleUrls: ['./question-detail.component.css']
 })

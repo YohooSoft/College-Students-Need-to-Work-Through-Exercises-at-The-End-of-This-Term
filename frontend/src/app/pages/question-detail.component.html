@@ -15,7 +15,7 @@
 
     <div class="question-body">
       <h3>题目内容:</h3>
-      <div class="content" [innerHTML]="question.content"></div>
+      <app-markdown-renderer [content]="question.content"></app-markdown-renderer>
 
       <!-- 单选题 -->
       <div *ngIf="question.type === 'SINGLE_CHOICE'" class="options-section">
@@ -109,17 +109,17 @@
 
         <div class="correct-answer">
           <h3>正确答案:</h3>
-          <p>{{ question.answer }}</p>
+          <app-markdown-renderer [content]="question.answer"></app-markdown-renderer>
         </div>
 
         <div *ngIf="question.explanation" class="explanation">
           <h3>答案解析:</h3>
-          <p>{{ question.explanation }}</p>
+          <app-markdown-renderer [content]="question.explanation"></app-markdown-renderer>
         </div>
 
         <div *ngIf="question.aiExplanation" class="ai-explanation">
           <h3>AI讲解:</h3>
-          <p>{{ question.aiExplanation }}</p>
+          <app-markdown-renderer [content]="question.aiExplanation"></app-markdown-renderer>
         </div>
       </div>
 

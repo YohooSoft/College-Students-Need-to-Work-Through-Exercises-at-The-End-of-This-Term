@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { UserAnswer, User, UserStatistics } from '../models/models';
+import { MarkdownRendererComponent } from '../components/markdown-renderer.component';
 
 @Component({
   selector: 'app-my-answers',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MarkdownRendererComponent],
   templateUrl: './my-answers.component.html',
   styleUrls: ['./my-answers.component.css']
 })
