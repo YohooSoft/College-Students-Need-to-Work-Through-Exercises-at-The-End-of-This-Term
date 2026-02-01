@@ -37,6 +37,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   // Edit mode
   isEditMode = false;
   questionId?: number;
+  loadingQuestion = false;
   
   // Form fields
   title = '';
@@ -85,20 +86,26 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.userSubscription = this.authService.user$.subscribe(user => {
-      this.user = user;
-      if (!user) {
-        this.router.navigate(['/login']);
-      }
-    });
-
-    // Check if we're in edit mode
+    // Check if we're in edit mode first
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
       this.questionId = +id;
-      this.loadQuestion(this.questionId);
     }
+
+    // Subscribe to user changes
+    this.userSubscription = this.authService.user$.subscribe(user => {
+      this.user = user;
+      if (!user) {
+        this.router.navigate(['/login']);
+        return;
+      }
+      
+      // Load question data after user is available (only in edit mode)
+      if (this.isEditMode && this.questionId && !this.loadingQuestion) {
+        this.loadQuestion(this.questionId);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -116,13 +123,16 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   }
 
   loadQuestion(id: number): void {
+    this.loadingQuestion = true;
     this.apiService.getQuestionById(id).subscribe({
       next: (response) => {
+        this.loadingQuestion = false;
         if (response.success) {
           const question: Question = response.data;
           
           // Check if user is the creator
-          if (!this.user || !question.creator || question.creator.id !== this.user.id) {
+          // Only check if creator exists - if creator is null/undefined, allow edit
+          if (question.creator && this.user && question.creator.id !== this.user.id) {
             this.error = '无权限编辑此题目';
             setTimeout(() => {
               this.router.navigate(['/']);
@@ -143,7 +153,8 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
           if (question.options) {
             try {
               const parsedOptions = JSON.parse(question.options);
-              if (typeof parsedOptions === 'object') {
+              // Check that parsedOptions is a valid object (not null, not array)
+              if (parsedOptions && typeof parsedOptions === 'object' && !Array.isArray(parsedOptions)) {
                 this.options = Object.entries(parsedOptions).map(([key, value]) => ({
                   key,
                   value: String(value)
@@ -158,7 +169,8 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         }
       },
       error: (err) => {
-        this.error = '加载题目失败';
+        this.loadingQuestion = false;
+        this.error = '加载题目失败: ' + (err.error?.message || err.message || '未知错误');
         console.error('Failed to load question:', err);
       }
     });

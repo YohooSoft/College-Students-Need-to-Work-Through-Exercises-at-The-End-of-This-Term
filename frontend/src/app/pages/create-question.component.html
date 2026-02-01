@@ -7,7 +7,11 @@
   <div *ngIf="error" class="alert alert-error">{{ error }}</div>
   <div *ngIf="success" class="alert alert-success">{{ success }}</div>
 
-  <form (ngSubmit)="handleSubmit()" class="question-form">
+  <div *ngIf="isEditMode && loadingQuestion" style="padding: 20px; text-align: center;">
+    <p>加载题目数据中...</p>
+  </div>
+
+  <form (ngSubmit)="handleSubmit()" class="question-form" *ngIf="!loadingQuestion">
     <!-- 题目标题 -->
     <div class="form-group">
       <label for="title">题目标题 <span class="required">*</span></label>

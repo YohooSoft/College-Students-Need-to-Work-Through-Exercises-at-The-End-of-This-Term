@@ -61,7 +61,7 @@
           </div>
         </div>
         <p style="color: #666; margin-bottom: 10px;">
-          <app-markdown-renderer [content]="question.content.substring(0, 200) + '...'"></app-markdown-renderer>
+          <app-markdown-renderer [content]="getPreviewContent(question.content, 200)"></app-markdown-renderer>
         </p>
         <div *ngIf="question.tags" style="margin-bottom: 10px;">
           <span *ngFor="let tag of getTags(question.tags)" style="margin-right: 5px; padding: 2px 8px; background: #e0e0e0; border-radius: 3px; font-size: 12px;">

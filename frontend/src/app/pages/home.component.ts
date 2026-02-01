@@ -107,6 +107,27 @@ export class HomeComponent implements OnInit {
     return tagsString ? tagsString.split(',') : [];
   }
 
+  getPreviewContent(content: string, maxLength: number = 200): string {
+    if (!content || content.length <= maxLength) {
+      return content;
+    }
+    
+    // Simple truncation that tries to avoid breaking in the middle of markdown/latex
+    let truncated = content.substring(0, maxLength);
+    
+    // If we're in the middle of a LaTeX expression, extend to include it
+    const openDollarCount = (truncated.match(/\$/g) || []).length;
+    if (openDollarCount % 2 !== 0) {
+      // Odd number of $ signs means we cut in the middle of a formula
+      const nextDollar = content.indexOf('$', maxLength);
+      if (nextDollar !== -1 && nextDollar < maxLength + 50) {
+        truncated = content.substring(0, nextDollar + 1);
+      }
+    }
+    
+    return truncated + '...';
+  }
+
   isCreator(question: Question): boolean {
     return this.user !== null && question.creator !== undefined && question.creator.id === this.user.id;
   }
