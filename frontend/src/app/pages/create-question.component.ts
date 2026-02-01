@@ -122,6 +122,10 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
     return this.type === 'TRUE_FALSE';
   }
 
+  private isValidOptionsObject(obj: any): boolean {
+    return obj && typeof obj === 'object' && !Array.isArray(obj);
+  }
+
   loadQuestion(id: number): void {
     this.loadingQuestion = true;
     this.apiService.getQuestionById(id).subscribe({
@@ -154,7 +158,7 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
             try {
               const parsedOptions = JSON.parse(question.options);
               // Check that parsedOptions is a valid object (not null, not array)
-              if (parsedOptions && typeof parsedOptions === 'object' && !Array.isArray(parsedOptions)) {
+              if (this.isValidOptionsObject(parsedOptions)) {
                 this.options = Object.entries(parsedOptions).map(([key, value]) => ({
                   key,
                   value: String(value)

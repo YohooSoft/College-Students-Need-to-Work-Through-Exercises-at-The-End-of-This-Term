@@ -108,7 +108,7 @@ export class HomeComponent implements OnInit {
   }
 
   getPreviewContent(content: string, maxLength: number = 200): string {
-    if (!content || content.length < maxLength) {
+    if (!content || content.length <= maxLength) {
       return content;
     }
     
@@ -142,7 +142,10 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (confirm(`确定要删除题目 "${question.title}" 吗？此操作不可恢复。`)) {
+    // Sanitize title for display in confirmation dialog
+    const sanitizedTitle = question.title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    
+    if (confirm(`确定要删除题目 "${sanitizedTitle}" 吗？此操作不可恢复。`)) {
       this.apiService.deleteQuestion(question.id, this.user.id).subscribe({
         next: (response) => {
           if (response.success) {
