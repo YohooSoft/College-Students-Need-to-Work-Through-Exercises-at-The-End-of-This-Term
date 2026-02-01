@@ -59,6 +59,22 @@ public class AnswerService {
             // 传统判题
             isCorrect = checkAnswer(question, request.getAnswer());
             score = isCorrect ? calculateScore(question) : 0;
+            
+            // 为所有题型生成AI讲解（如果AI服务可用）
+            if (aiService != null) {
+                try {
+                    aiFeedback = aiService.generateExplanation(
+                        question.getTitle(),
+                        question.getContent(),
+                        question.getAnswer(),
+                        request.getAnswer(),
+                        isCorrect
+                    );
+                } catch (Exception e) {
+                    // AI讲解生成失败不影响提交
+                    aiFeedback = null;
+                }
+            }
         }
         
         UserAnswer userAnswer = new UserAnswer();

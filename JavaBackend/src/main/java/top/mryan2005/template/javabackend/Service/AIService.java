@@ -14,27 +14,59 @@ public class AIService {
     private OpenAiChatModel chatModel;
     
     /**
-     * 生成AI讲解
+     * 生成AI讲解 - 基于用户答案生成个性化讲解
      */
-    public String generateExplanation(String questionTitle, String questionContent, String answer) {
+    public String generateExplanation(String questionTitle, String questionContent, String correctAnswer, String userAnswer, boolean isCorrect) {
         if (chatModel == null) {
             return "AI服务未配置";
         }
         
         try {
-            String prompt = String.format(
-                "请为以下题目生成详细的讲解说明：\n\n" +
-                "题目：%s\n" +
-                "内容：%s\n" +
-                "答案：%s\n\n" +
-                "请提供清晰、易懂的讲解，帮助学生理解这道题目。",
-                questionTitle, questionContent, answer
-            );
+            String prompt;
+            if (isCorrect) {
+                prompt = String.format(
+                    "学生答对了这道题！请为以下题目生成鼓励性的讲解说明：\n\n" +
+                    "题目：%s\n" +
+                    "内容：%s\n" +
+                    "正确答案：%s\n" +
+                    "学生答案：%s\n\n" +
+                    "请提供：\n" +
+                    "1. 肯定学生的正确理解\n" +
+                    "2. 解释为什么这个答案是对的\n" +
+                    "3. 相关知识点的延伸\n" +
+                    "4. 类似题目的解题技巧\n\n" +
+                    "注意：答案可能包含Markdown、LaTeX公式或Markmap图表，请正确解析。",
+                    questionTitle, questionContent, correctAnswer, userAnswer
+                );
+            } else {
+                prompt = String.format(
+                    "学生答错了这道题。请为以下题目生成针对性的讲解：\n\n" +
+                    "题目：%s\n" +
+                    "内容：%s\n" +
+                    "正确答案：%s\n" +
+                    "学生答案：%s\n\n" +
+                    "请提供：\n" +
+                    "1. 分析学生错在哪里（对比学生答案和正确答案）\n" +
+                    "2. 解释正确的解题思路\n" +
+                    "3. 指出学生的理解误区\n" +
+                    "4. 提供记忆技巧或解题方法\n" +
+                    "5. 给出鼓励和建议\n\n" +
+                    "注意：答案可能包含Markdown、LaTeX公式或Markmap图表，请正确解析。",
+                    questionTitle, questionContent, correctAnswer, userAnswer
+                );
+            }
             
             return chatModel.call(prompt);
         } catch (Exception e) {
             return "AI讲解生成失败：" + e.getMessage();
         }
+    }
+    
+    /**
+     * 生成AI讲解 - 仅基于题目内容（兼容旧版本）
+     */
+    public String generateExplanation(String questionTitle, String questionContent, String answer) {
+        return generateExplanation(questionTitle, questionContent, answer, "", true);
     }
     
     /**
