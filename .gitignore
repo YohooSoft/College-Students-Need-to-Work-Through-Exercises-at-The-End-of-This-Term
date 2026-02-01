@@ -34,3 +34,14 @@ build/
 
 ### React Backup ###
 frontend-react-backup/
+
+### Node.js ###
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+### Angular ###
+/frontend/dist/
+/frontend/.angular/
+/frontend/.cache/

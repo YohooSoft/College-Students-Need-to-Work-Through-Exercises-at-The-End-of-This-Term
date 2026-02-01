@@ -1,0 +1,187 @@
+<div class="create-question-container">
+  <div class="header">
+    <h1>创建题目</h1>
+    <a routerLink="/" class="back-link">← 返回首页</a>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="success" class="alert alert-success">{{ success }}</div>
+
+  <form (ngSubmit)="handleSubmit()" class="question-form">
+    <!-- 题目标题 -->
+    <div class="form-group">
+      <label for="title">题目标题 <span class="required">*</span></label>
+      <input
+        id="title"
+        type="text"
+        [(ngModel)]="title"
+        name="title"
+        placeholder="请输入题目标题"
+        required
+        [disabled]="submitting"
+      />
+    </div>
+
+    <!-- 题目类型 -->
+    <div class="form-group">
+      <label for="type">题目类型 <span class="required">*</span></label>
+      <select
+        id="type"
+        [(ngModel)]="type"
+        name="type"
+        required
+        [disabled]="submitting"
+      >
+        <option *ngFor="let qt of questionTypes" [value]="qt.value">
+          {{ qt.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 难度 -->
+    <div class="form-group">
+      <label for="difficulty">难度 <span class="required">*</span></label>
+      <select
+        id="difficulty"
+        [(ngModel)]="difficulty"
+        name="difficulty"
+        required
+        [disabled]="submitting"
+      >
+        <option *ngFor="let dl of difficultyLevels" [value]="dl.value">
+          {{ dl.label }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 题目内容 -->
+    <div class="form-group">
+      <label for="content">题目内容 <span class="required">*</span></label>
+      <textarea
+        id="content"
+        [(ngModel)]="content"
+        name="content"
+        rows="6"
+        placeholder="请输入题目内容（支持Markdown格式）"
+        required
+        [disabled]="submitting"
+      ></textarea>
+      <small class="help-text">支持Markdown格式，如 **粗体** 、*斜体* 、`代码` 等</small>
+    </div>
+
+    <!-- 选项（单选、多选题） -->
+    <div *ngIf="isChoiceQuestion" class="form-group">
+      <label>选项 <span class="required">*</span></label>
+      <div class="options-container">
+        <div *ngFor="let option of options; let i = index" class="option-row">
+          <span class="option-key">{{ option.key }}.</span>
+          <input
+            type="text"
+            [(ngModel)]="option.value"
+            [name]="'option-' + i"
+            placeholder="请输入选项内容"
+            required
+            [disabled]="submitting"
+          />
+          <button
+            type="button"
+            class="btn-remove"
+            (click)="removeOption(i)"
+            [disabled]="options.length <= 2 || submitting"
+            aria-label="删除选项"
+          >
+            ✕
+          </button>
+        </div>
+        <button
+          type="button"
+          class="btn-add-option"
+          (click)="addOption()"
+          [disabled]="options.length >= 10 || submitting"
+        >
+          + 添加选项
+        </button>
+      </div>
+    </div>
+
+    <!-- 判断题提示 -->
+    <div *ngIf="isTrueFalseQuestion" class="form-group">
+      <div class="info-box">
+        <strong>判断题选项：</strong> A. 正确 / B. 错误
+      </div>
+    </div>
+
+    <!-- 答案 -->
+    <div class="form-group">
+      <label for="answer">答案 <span class="required">*</span></label>
+      <div *ngIf="type === 'SINGLE_CHOICE'" class="answer-hint">
+        <small>单选题答案格式：输入选项字母，如：A</small>
+      </div>
+      <div *ngIf="type === 'MULTIPLE_CHOICE'" class="answer-hint">
+        <small>多选题答案格式：输入选项字母，用逗号分隔，如：A,C,D</small>
+      </div>
+      <div *ngIf="type === 'TRUE_FALSE'" class="answer-hint">
+        <small>判断题答案格式：A（正确）或 B（错误）</small>
+      </div>
+      <input
+        *ngIf="type !== 'SHORT_ANSWER' && type !== 'ESSAY'"
+        id="answer"
+        type="text"
+        [(ngModel)]="answer"
+        name="answer"
+        placeholder="请输入答案"
+        required
+        [disabled]="submitting"
+      />
+      <textarea
+        *ngIf="type === 'SHORT_ANSWER' || type === 'ESSAY'"
+        id="answer"
+        [(ngModel)]="answer"
+        name="answer"
+        rows="4"
+        placeholder="请输入答案"
+        required
+        [disabled]="submitting"
+      ></textarea>
+    </div>
+
+    <!-- 解析 -->
+    <div class="form-group">
+      <label for="explanation">答案解析</label>
+      <textarea
+        id="explanation"
+        [(ngModel)]="explanation"
+        name="explanation"
+        rows="4"
+        placeholder="请输入答案解析（可选，支持Markdown格式）"
+        [disabled]="submitting"
+      ></textarea>
+      <small class="help-text">为学生提供详细的答案解析</small>
+    </div>
+
+    <!-- 标签 -->
+    <div class="form-group">
+      <label for="tags">标签</label>
+      <input
+        id="tags"
+        type="text"
+        [(ngModel)]="tags"
+        name="tags"
+        placeholder="请输入标签，用逗号分隔，如：数学,代数,函数"
+        [disabled]="submitting"
+      />
+      <small class="help-text">用逗号分隔多个标签，便于分类和搜索</small>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="submitting">
+        {{ submitting ? '创建中...' : '创建题目' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="submitting">
+        重置
+      </button>
+      <a routerLink="/" class="btn btn-link">取消</a>
+    </div>
+  </form>
+</div>

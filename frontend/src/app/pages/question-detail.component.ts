@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
-import { Question, User } from '../models/models';
+import { Question, QuestionOption, User } from '../models/models';
 import { MarkdownRendererComponent } from '../components/markdown-renderer.component';
 
 @Component({
@@ -29,7 +29,8 @@ export class QuestionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private  changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -52,10 +53,12 @@ export class QuestionDetailComponent implements OnInit {
           this.checkIfCollected();
         }
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load question:', error);
         this.loading = false;
+        this.changeDetector.markForCheck();
       }
     });
   }
@@ -75,10 +78,31 @@ export class QuestionDetailComponent implements OnInit {
     }
   }
 
-  getOptions(): any[] {
+  getOptions(): QuestionOption[] {
     if (!this.question?.options) return [];
     try {
-      return JSON.parse(this.question.options);
+      const parsed = JSON.parse(this.question.options);
+      
+      // If parsed is an array, validate and return it
+      if (Array.isArray(parsed)) {
+        // Validate that each element has key and value properties
+        return parsed.filter(item => 
+          item && typeof item === 'object' && 'key' in item && 'value' in item
+        ).map(item => ({
+          key: String(item.key),
+          value: String(item.value)
+        }));
+      }
+      
+      // If parsed is an object, convert it to array format
+      if (typeof parsed === 'object' && parsed !== null) {
+        return Object.entries(parsed).map(([key, value]) => ({
+          key,
+          value: String(value)
+        }));
+      }
+      
+      return [];
     } catch {
       return [];
     }
@@ -168,6 +192,12 @@ export class QuestionDetailComponent implements OnInit {
       HARD: '困难',
     };
     return levels[difficulty] || difficulty;
+  }
+
+  isChoiceQuestion(): boolean {
+    return this.question?.type === 'SINGLE_CHOICE' || 
+           this.question?.type === 'MULTIPLE_CHOICE' || 
+           this.question?.type === 'TRUE_FALSE';
   }
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,7 +21,8 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -39,10 +40,12 @@ export class HomeComponent implements OnInit {
           this.questions = response.data;
         }
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load questions:', error);
         this.loading = false;
+        this.changeDetector.markForCheck();
       }
     });
   }
@@ -53,12 +56,14 @@ export class HomeComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.questions = response.data.content || response.data;
+          this.changeDetector.markForCheck();
         }
         this.loading = false;
       },
       error: (error) => {
         console.error('Search failed:', error);
         this.loading = false;
+        this.changeDetector.markForCheck();
       }
     });
   }

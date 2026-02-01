@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../services/api.service';
@@ -22,7 +22,8 @@ export class UsersComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -38,12 +39,15 @@ export class UsersComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.users = response.data;
+          this.changeDetector.markForCheck();
         }
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load users:', error);
         this.loading = false;
+        this.changeDetector.markForCheck();
       }
     });
   }

@@ -1,3 +1,8 @@
+export interface QuestionOption {
+  key: string;
+  value: string;
+}
+
 export interface User {
   id: number;
   username: string;

@@ -98,11 +98,17 @@
   background: #f8f9fa;
   padding: 15px;
   border-radius: 6px;
-  transition: background 0.2s;
+  transition: background 0.2s, border 0.2s;
+  border: 2px solid transparent;
 }
 
 .option-item:hover {
   background: #e9ecef;
+}
+
+.option-item.selected {
+  background: #e3f2fd;
+  border-color: #007bff;
 }
 
 .option-item label {
@@ -147,6 +153,25 @@
 .answer-section textarea:focus {
   outline: none;
   border-color: #007bff;
+}
+
+.selected-answer-hint {
+  margin: 20px 0;
+  padding: 15px;
+  background: #e3f2fd;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+}
+
+.selected-answer-hint p {
+  margin: 0;
+  color: #1976d2;
+  font-size: 15px;
+}
+
+.selected-options {
+  font-weight: 600;
+  color: #0d47a1;
 }
 
 .action-buttons {

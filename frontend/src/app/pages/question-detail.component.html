@@ -21,7 +21,9 @@
       <div *ngIf="question.type === 'SINGLE_CHOICE'" class="options-section">
         <h3>选项:</h3>
         <div class="options">
-          <div *ngFor="let option of getOptions()" class="option-item">
+          <div *ngFor="let option of getOptions()" 
+               class="option-item" 
+               [class.selected]="selectedOptions.includes(option.key)">
             <label>
               <input 
                 type="radio" 
@@ -31,7 +33,9 @@
                 (change)="toggleOption(option.key)"
                 [disabled]="submitted">
               <span class="option-key">{{ option.key }}.</span>
-              <span class="option-text">{{ option.value }}</span>
+              <span class="option-text">
+                <app-markdown-renderer [content]="option.value"></app-markdown-renderer>
+              </span>
             </label>
           </div>
         </div>
@@ -41,7 +45,9 @@
       <div *ngIf="question.type === 'MULTIPLE_CHOICE'" class="options-section">
         <h3>选项: (可多选)</h3>
         <div class="options">
-          <div *ngFor="let option of getOptions()" class="option-item">
+          <div *ngFor="let option of getOptions()" 
+               class="option-item"
+               [class.selected]="selectedOptions.includes(option.key)">
             <label>
               <input 
                 type="checkbox" 
@@ -50,7 +56,9 @@
                 (change)="toggleOption(option.key)"
                 [disabled]="submitted">
               <span class="option-key">{{ option.key }}.</span>
-              <span class="option-text">{{ option.value }}</span>
+              <span class="option-text">
+                <app-markdown-renderer [content]="option.value"></app-markdown-renderer>
+              </span>
             </label>
           </div>
         </div>
@@ -60,7 +68,7 @@
       <div *ngIf="question.type === 'TRUE_FALSE'" class="options-section">
         <h3>请选择:</h3>
         <div class="options">
-          <div class="option-item">
+          <div class="option-item" [class.selected]="selectedOptions.includes('true')">
             <label>
               <input 
                 type="radio" 
@@ -72,7 +80,7 @@
               <span class="option-text">正确</span>
             </label>
           </div>
-          <div class="option-item">
+          <div class="option-item" [class.selected]="selectedOptions.includes('false')">
             <label>
               <input 
                 type="radio" 
@@ -97,8 +105,24 @@
           [rows]="question.type === 'ESSAY' ? 10 : 3"></textarea>
       </div>
 
+      <!-- 已选答案提示 (选择题) -->
+      <div *ngIf="isChoiceQuestion() && selectedOptions.length > 0 && !submitted" 
+           class="selected-answer-hint"
+           role="status"
+           aria-live="polite"
+           aria-label="已选答案">
+        <p><strong>你的选择:</strong> 
+          <span class="selected-options">{{ selectedOptions.join(', ') }}</span>
+        </p>
+      </div>
+
       <div class="action-buttons" *ngIf="!submitted && user">
-        <button class="btn btn-primary" (click)="submitAnswer()">提交答案</button>
+        <button class="btn btn-primary" 
+                (click)="submitAnswer()" 
+                [disabled]="isChoiceQuestion() && selectedOptions.length === 0"
+                [attr.aria-label]="selectedOptions.length === 0 ? '请先选择答案' : '提交答案'">
+          提交答案
+        </button>
       </div>
 
       <div *ngIf="submitted" class="result-section">
