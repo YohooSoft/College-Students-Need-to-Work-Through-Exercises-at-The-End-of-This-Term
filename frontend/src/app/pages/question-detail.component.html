@@ -102,15 +102,21 @@
       </div>
 
       <!-- 已选答案提示 (选择题) -->
-      <div *ngIf="(question.type === 'SINGLE_CHOICE' || question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE') && selectedOptions.length > 0 && !submitted" class="selected-answer-hint">
+      <div *ngIf="isChoiceQuestion() && selectedOptions.length > 0 && !submitted" 
+           class="selected-answer-hint"
+           role="status"
+           aria-live="polite"
+           aria-label="已选答案">
         <p><strong>你的选择:</strong> 
           <span class="selected-options">{{ selectedOptions.join(', ') }}</span>
         </p>
       </div>
 
       <div class="action-buttons" *ngIf="!submitted && user">
-        <button class="btn btn-primary" (click)="submitAnswer()" 
-                [disabled]="(question.type === 'SINGLE_CHOICE' || question.type === 'MULTIPLE_CHOICE' || question.type === 'TRUE_FALSE') && selectedOptions.length === 0">
+        <button class="btn btn-primary" 
+                (click)="submitAnswer()" 
+                [disabled]="isChoiceQuestion() && selectedOptions.length === 0"
+                [attr.aria-label]="selectedOptions.length === 0 ? '请先选择答案' : '提交答案'">
           提交答案
         </button>
       </div>

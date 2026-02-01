@@ -172,5 +172,11 @@ export class QuestionDetailComponent implements OnInit {
     };
     return levels[difficulty] || difficulty;
   }
+
+  isChoiceQuestion(): boolean {
+    return this.question?.type === 'SINGLE_CHOICE' || 
+           this.question?.type === 'MULTIPLE_CHOICE' || 
+           this.question?.type === 'TRUE_FALSE';
+  }
 }
 
