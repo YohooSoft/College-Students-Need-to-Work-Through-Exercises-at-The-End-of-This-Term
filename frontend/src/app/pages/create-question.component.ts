@@ -135,12 +135,12 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
           const question: Question = response.data;
           
           // Check if user is the creator
-          // Only check if creator exists - if creator is null/undefined, allow edit
+          // Note: If creator is null/undefined (e.g., legacy questions), allow edit.
+          // Backend will still enforce permissions if needed.
           if (question.creator && this.user && question.creator.id !== this.user.id) {
             this.error = '无权限编辑此题目';
-            setTimeout(() => {
-              this.router.navigate(['/']);
-            }, 500);
+            // Navigate immediately - user has already seen the error
+            this.router.navigate(['/']);
             return;
           }
 

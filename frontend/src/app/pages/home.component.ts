@@ -142,10 +142,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    // Sanitize title for display in confirmation dialog
-    const sanitizedTitle = question.title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    
-    if (confirm(`确定要删除题目 "${sanitizedTitle}" 吗？此操作不可恢复。`)) {
+    // confirm() dialog doesn't interpret HTML, so no sanitization needed
+    if (confirm(`确定要删除题目 "${question.title}" 吗？此操作不可恢复。`)) {
       this.apiService.deleteQuestion(question.id, this.user.id).subscribe({
         next: (response) => {
           if (response.success) {
