@@ -159,7 +159,7 @@ export class MarkdownRendererComponent implements OnInit, OnChanges, AfterViewIn
     processedContent = processedContent.replace(/\$\$(.+?)\$\$/gs, (match: string, latex: string) => {
       try {
         const rendered = katex.renderToString(latex, { displayMode: true, throwOnError: false });
-        return `<div class="katex-display">${rendered}</div>`;
+        return rendered; // Return rendered HTML directly without extra wrapper
       } catch (e) {
         console.error('KaTeX display render error:', e);
         return match;
@@ -170,7 +170,7 @@ export class MarkdownRendererComponent implements OnInit, OnChanges, AfterViewIn
     processedContent = processedContent.replace(/\$(.+?)\$/g, (match: string, latex: string) => {
       try {
         const rendered = katex.renderToString(latex, { throwOnError: false });
-        return `<span class="katex-inline">${rendered}</span>`;
+        return rendered; // Return rendered HTML directly without extra wrapper
       } catch (e) {
         console.error('KaTeX inline render error:', e);
         return match;
