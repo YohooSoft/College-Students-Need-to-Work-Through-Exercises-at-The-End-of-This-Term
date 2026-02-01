@@ -1,6 +1,6 @@
 <div class="create-question-container">
   <div class="header">
-    <h1>创建题目</h1>
+    <h1>{{ isEditMode ? '编辑题目' : '创建题目' }}</h1>
     <a routerLink="/" class="back-link">← 返回首页</a>
   </div>
 
@@ -176,7 +176,7 @@
     <!-- 提交按钮 -->
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="submitting">
-        {{ submitting ? '创建中...' : '创建题目' }}
+        {{ submitting ? (isEditMode ? '更新中...' : '创建中...') : (isEditMode ? '更新题目' : '创建题目') }}
       </button>
       <button type="button" class="btn btn-secondary" (click)="resetForm()" [disabled]="submitting">
         重置

@@ -1,11 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
-import { User } from '../models/models';
+import { User, Question } from '../models/models';
 
 interface QuestionOption {
   key: string;
@@ -33,6 +33,10 @@ interface QuestionCreateRequest {
 export class CreateQuestionComponent implements OnInit, OnDestroy {
   user: User | null = null;
   private userSubscription?: Subscription;
+  
+  // Edit mode
+  isEditMode = false;
+  questionId?: number;
   
   // Form fields
   title = '';
@@ -76,7 +80,8 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
   constructor(
     private apiService: ApiService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -86,6 +91,14 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
         this.router.navigate(['/login']);
       }
     });
+
+    // Check if we're in edit mode
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.questionId = +id;
+      this.loadQuestion(this.questionId);
+    }
   }
 
   ngOnDestroy(): void {
@@ -100,6 +113,55 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
 
   get isTrueFalseQuestion(): boolean {
     return this.type === 'TRUE_FALSE';
+  }
+
+  loadQuestion(id: number): void {
+    this.apiService.getQuestionById(id).subscribe({
+      next: (response) => {
+        if (response.success) {
+          const question: Question = response.data;
+          
+          // Check if user is the creator
+          if (!this.user || !question.creator || question.creator.id !== this.user.id) {
+            this.error = '无权限编辑此题目';
+            setTimeout(() => {
+              this.router.navigate(['/']);
+            }, 2000);
+            return;
+          }
+
+          // Load question data into form
+          this.title = question.title;
+          this.content = question.content;
+          this.type = question.type;
+          this.difficulty = question.difficulty;
+          this.answer = question.answer;
+          this.explanation = question.explanation || '';
+          this.tags = question.tags || '';
+
+          // Load options for choice questions
+          if (question.options) {
+            try {
+              const parsedOptions = JSON.parse(question.options);
+              if (typeof parsedOptions === 'object') {
+                this.options = Object.entries(parsedOptions).map(([key, value]) => ({
+                  key,
+                  value: String(value)
+                }));
+              }
+            } catch (e) {
+              console.error('Failed to parse options:', e);
+            }
+          }
+        } else {
+          this.error = response.message || '加载题目失败';
+        }
+      },
+      error: (err) => {
+        this.error = '加载题目失败';
+        console.error('Failed to load question:', err);
+      }
+    });
   }
 
   addOption(): void {
@@ -179,24 +241,45 @@ export class CreateQuestionComponent implements OnInit, OnDestroy {
       requestData.options = JSON.stringify(optionsObj);
     }
 
-    // Call API
-    this.apiService.createQuestion(requestData, this.user.id).subscribe({
-      next: (response) => {
-        this.submitting = false;
-        if (response.success) {
-          this.success = '题目创建成功！正在跳转...';
-          setTimeout(() => {
-            this.router.navigate(['/questions', response.data.id]);
-          }, 1500);
-        } else {
-          this.error = response.message || '创建失败';
+    // Call API - either create or update
+    if (this.isEditMode && this.questionId) {
+      this.apiService.updateQuestion(this.questionId, requestData, this.user.id).subscribe({
+        next: (response) => {
+          this.submitting = false;
+          if (response.success) {
+            this.success = '题目更新成功！正在跳转...';
+            setTimeout(() => {
+              this.router.navigate(['/questions', response.data.id]);
+            }, 1500);
+          } else {
+            this.error = response.message || '更新失败';
+          }
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.error = err.error?.message || '更新失败，请重试';
         }
-      },
-      error: (err) => {
-        this.submitting = false;
-        this.error = err.error?.message || '创建失败，请重试';
-      }
-    });
+      });
+    } else {
+      // Call API
+      this.apiService.createQuestion(requestData, this.user.id).subscribe({
+        next: (response) => {
+          this.submitting = false;
+          if (response.success) {
+            this.success = '题目创建成功！正在跳转...';
+            setTimeout(() => {
+              this.router.navigate(['/questions', response.data.id]);
+            }, 1500);
+          } else {
+            this.error = response.message || '创建失败';
+          }
+        },
+        error: (err) => {
+          this.submitting = false;
+          this.error = err.error?.message || '创建失败，请重试';
+        }
+      });
+    }
   }
 
   resetForm(): void {

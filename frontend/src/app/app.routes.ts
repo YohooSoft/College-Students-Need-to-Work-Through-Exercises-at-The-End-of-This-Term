@@ -14,6 +14,7 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'questions/create', component: CreateQuestionComponent },
+  { path: 'questions/edit/:id', component: CreateQuestionComponent },
   { path: 'questions/:id', component: QuestionDetailComponent },
   { path: 'question-sets', component: QuestionSetsComponent },
   { path: 'collections', component: CollectionsComponent },
