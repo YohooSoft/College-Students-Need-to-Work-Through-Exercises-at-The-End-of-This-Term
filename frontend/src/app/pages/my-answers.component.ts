@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
@@ -20,7 +20,8 @@ export class MyAnswersComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -34,18 +35,20 @@ export class MyAnswersComponent implements OnInit {
 
   loadData(): void {
     if (!this.user) return;
-    
+
     this.loading = true;
-    
+
     // Load user statistics
     this.apiService.getUserStatistics(this.user.id).subscribe({
       next: (response) => {
         if (response.success) {
           this.statistics = response.data;
         }
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load statistics:', error);
+        this.changeDetector.markForCheck();
       }
     });
 

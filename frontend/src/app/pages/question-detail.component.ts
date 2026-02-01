@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -29,7 +29,8 @@ export class QuestionDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
+    private  changeDetector: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -52,10 +53,12 @@ export class QuestionDetailComponent implements OnInit {
           this.checkIfCollected();
         }
         this.loading = false;
+        this.changeDetector.markForCheck();
       },
       error: (error) => {
         console.error('Failed to load question:', error);
         this.loading = false;
+        this.changeDetector.markForCheck();
       }
     });
   }
